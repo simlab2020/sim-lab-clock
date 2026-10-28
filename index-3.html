@@ -1,0 +1,1158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sim Lab Clock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Atkinson+Hyperlegible+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF3F4; --surface:#FFFFFF; --ink:#15303A; --muted:#58717B; --line:#D3DFE2;
+  --accent:#0E6E73; --accent-ink:#FFFFFF; --accent-soft:#DCEEEE;
+  --warn:#A55F00; --alert:#B3261E; --alert-soft:#FBE4E2;
+  --ui:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1C21; --surface:#172A31; --ink:#E3EEF0; --muted:#93AAB2; --line:#29434C;
+    --accent:#55B8B9; --accent-ink:#06282A; --accent-soft:#1E3A40;
+    --warn:#F0B35A; --alert:#FF8A80; --alert-soft:#3A2224;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1C21; --surface:#172A31; --ink:#E3EEF0; --muted:#93AAB2; --line:#29434C;
+  --accent:#55B8B9; --accent-ink:#06282A; --accent-soft:#1E3A40;
+  --warn:#F0B35A; --alert:#FF8A80; --alert-soft:#3A2224;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none !important}
+
+/* ---------- control ---------- */
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 48px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.top h1{font-size:1.5rem;margin:0;letter-spacing:-.01em}
+.sync{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.9rem}
+.sync i{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block}
+.sync[data-s="live"] i{background:#2E9E6B}
+.sync[data-s="error"] i,.sync[data-s="none"] i{background:var(--alert)}
+.spacer{flex:1}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;min-height:40px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.danger{color:var(--alert)}
+.btn.small{padding:6px 10px;min-height:36px;font-size:.92rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:14px}
+.group label{display:inline-flex;align-items:center;gap:8px;margin-right:6px}
+.group .count{color:var(--muted);font-size:.92rem;margin-right:auto}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
+
+.list{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:6px 14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:12px 14px}
+.row[data-status="running"]{border-left-color:var(--accent)}
+.row[data-status="paused"]{border-left-color:var(--warn)}
+.row[data-status="stopped"]{border-left-color:var(--alert)}
+.row .name{font-weight:700;font-size:1.05rem}
+.row .meta{color:var(--muted);font-size:.9rem}
+.row .live{font-family:var(--mono);font-weight:700;font-size:1.9rem;font-variant-numeric:tabular-nums;letter-spacing:-.02em;text-align:right;white-space:nowrap}
+.row .live small{font-size:.5em;margin-left:4px;font-weight:600}
+.row .live.warn{color:var(--warn)} .row .live.done{color:var(--alert)}
+.row .acts{grid-column:2 / 4;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row .acts .gap{flex:1}
+.pill{display:inline-block;font-size:.8rem;padding:1px 8px;border-radius:99px;background:var(--accent-soft);color:var(--ink);margin-left:6px;vertical-align:2px}
+.row[data-status="stopped"] .pill{background:var(--alert-soft)}
+
+.empty{border:2px dashed var(--line);border-radius:12px;padding:36px 20px;text-align:center;color:var(--muted)}
+.empty p{max-width:46ch;margin:0 auto 14px}
+.notice{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+
+/* ---------- picker ---------- */
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.pick a{display:block;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;font-weight:700}
+.pick a span{display:block;font-weight:400;color:var(--muted);font-size:.88rem;font-family:var(--mono)}
+
+/* ---------- display ---------- */
+#v-display{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--dbg);color:var(--dink);padding:max(16px,env(safe-area-inset-top,0px)) 4vw max(16px,env(safe-area-inset-bottom,0px));
+  --dbg:var(--bg); --dink:var(--ink); --dmuted:var(--muted); --dwarn:var(--warn); --dalert:var(--alert); --dline:var(--line)}
+#v-display[data-dtheme="monitor"]{--dbg:#061418;--dink:#8BEBD9;--dmuted:#4F8C86;--dwarn:#FFC266;--dalert:#FF6B5E;--dline:#16343A}
+#v-display[data-dtheme="wall"]{--dbg:#FBFCFC;--dink:#0F2A33;--dmuted:#5E7680;--dwarn:#9A5800;--dalert:#B3261E;--dline:#D9E3E6}
+#v-display[data-dtheme="contrast"]{--dbg:#000000;--dink:#FFE45C;--dmuted:#E8E8E8;--dwarn:#FF9F1C;--dalert:#FF4D4D;--dline:#444}
+#v-display.idle{cursor:none}
+.d-name{position:absolute;top:max(14px,env(safe-area-inset-top,0px));left:4vw;font-size:clamp(16px,2.4vw,34px);font-weight:700;color:var(--dmuted)}
+.d-mode{font-size:clamp(16px,2.6vw,40px);color:var(--dmuted);margin-bottom:.2em}
+.d-time{font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums;line-height:.95;letter-spacing:-.04em;
+  font-size:min(19vw,42vh);white-space:nowrap;display:flex;align-items:baseline}
+.d-time small{font-size:.28em;letter-spacing:0;margin-left:.25em;font-weight:600}
+.d-time.long{font-size:min(14.5vw,40vh)}
+.d-time.warn{color:var(--dwarn)}
+.d-time.done{color:var(--dalert)}
+.d-frame{position:absolute;inset:0;pointer-events:none;border:clamp(10px,1.6vw,26px) solid var(--dalert);opacity:0;z-index:3;transition:opacity .6s}
+#v-display.ended .d-frame{opacity:1;animation:endglow 4s ease-in-out infinite}
+@keyframes endglow{0%,100%{opacity:.35}50%{opacity:1}}
+#v-display.ended .d-mode{color:var(--dalert);font-weight:700}
+@media (prefers-reduced-motion: reduce){#v-display.ended .d-frame{animation:none;opacity:1}}
+.row .endpill{display:none;background:var(--alert-soft)}
+.row.ended .endpill{display:inline-block}
+.d-status{margin-top:.5em;font-size:clamp(18px,3.4vw,52px);font-weight:700;color:var(--dmuted);border:3px solid var(--dline);border-radius:999px;padding:.05em .8em}
+.d-status.stopped{color:var(--dalert);border-color:var(--dalert)}
+.d-status.paused{color:var(--dwarn);border-color:var(--dwarn)}
+.d-msg{position:absolute;left:4vw;right:4vw;bottom:max(18px,env(safe-area-inset-bottom,0px));text-align:center;font-size:clamp(18px,3.2vw,56px);font-weight:700;color:var(--dtext,var(--dink));border-top:2px solid var(--dline);padding-top:.35em}
+.d-dim .d-time{opacity:.5}
+.d-tools{position:absolute;top:max(10px,env(safe-area-inset-top,0px));right:4vw;display:flex;gap:8px;transition:opacity .3s}
+.d-tools button,.d-tools a{background:transparent;border:1px solid var(--dline);color:var(--dmuted);border-radius:8px;padding:6px 12px;font-size:.95rem;text-decoration:none}
+#v-display.idle .d-tools{opacity:0;pointer-events:none}
+#v-display{--dtk:var(--surface)}
+#v-display[data-dtheme="monitor"]{--dtk:#0C2A2F}
+#v-display[data-dtheme="wall"]{--dtk:#E4EDEF}
+#v-display[data-dtheme="contrast"]{--dtk:#1C1C1C}
+.d-ticker{position:absolute;left:0;right:0;top:0;padding-top:env(safe-area-inset-top,0px);overflow:hidden;background:var(--dtk);border-bottom:2px solid var(--dline);
+  font-size:clamp(20px,3.2vw,52px);font-weight:700;line-height:1.7;white-space:nowrap;color:var(--dtext,var(--dink))}
+.tk-track{display:inline-flex;will-change:transform;animation:tk var(--tk-dur,20s) linear infinite}
+.tk-copy{display:inline-flex;align-items:center;min-width:100vw;padding-right:2.5em}
+.tk-item.alert{background:var(--dalert);color:var(--dbg);border-radius:.25em;padding:0 .35em}
+.tk-sep{opacity:.45;padding:0 .9em}
+@keyframes tk{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion: reduce){.tk-track{animation:none;flex-wrap:wrap;white-space:normal}.tk-copy+.tk-copy{display:none}.d-ticker{white-space:normal}}
+#v-display.has-ticker .d-name,#v-display.has-ticker .d-tools{top:calc(clamp(20px,3.2vw,52px)*1.7 + 14px + env(safe-area-inset-top,0px))}
+.mlist{display:flex;flex-direction:column;gap:6px}
+.inbox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px 4px;margin-bottom:14px}
+.inbox-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.inbox-head h2{font-size:1.05rem;margin:0}
+.inbox-head .count{color:var(--muted);font-size:.9rem;margin-right:auto}
+.ib-card{border-top:1px solid var(--line);padding:10px 0;margin-top:8px}
+.ib-q{font-weight:700;overflow-wrap:anywhere}
+.ib-meta{color:var(--muted);font-size:.86rem;margin-top:1px}
+.ib-ans{display:grid;grid-template-columns:minmax(80px,max-content) 1fr auto;gap:3px 12px;margin:8px 0;font-size:.95rem;align-items:baseline}
+.ib-ans b{font-weight:700}
+.ib-ans .wait{color:var(--muted);font-style:italic}
+.ib-ans .t{color:var(--muted);font-size:.82rem;white-space:nowrap}
+.ib-ans .fresh{background:var(--accent-soft);border-radius:4px;padding:0 4px}
+.ib-acts{display:flex;gap:6px;flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:4px 10px;font-size:.88rem}
+.d-ask{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);padding:4vw;z-index:6}
+.ask-card{color-scheme:light;background:#FFFFFF;color:#15303A;border-radius:18px;width:min(980px,94vw);max-height:92vh;overflow:auto;padding:clamp(18px,3vw,44px);box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:var(--ui)}
+.ask-from{font-size:clamp(14px,1.6vw,24px);font-weight:700;color:#0E6E73;letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;gap:1em}
+.ask-q{font-size:clamp(24px,3.6vw,58px);font-weight:700;line-height:1.2;margin:.3em 0 .6em;overflow-wrap:anywhere}
+.ask-btns{display:flex;flex-wrap:wrap;gap:.5em}
+.ask-btns button,.ask-send{font:inherit;font-size:clamp(20px,2.5vw,38px);font-weight:700;padding:.45em 1.1em;border-radius:12px;border:3px solid #0E6E73;background:#0E6E73;color:#FFFFFF;cursor:pointer;min-height:48px}
+.ask-btns button.alt{background:#FFFFFF;color:#0E6E73}
+.ask-btns button[aria-pressed="true"]{outline:4px solid #F0B35A;outline-offset:2px}
+.ask-type{display:flex;gap:.5em;margin-top:.7em;align-items:stretch}
+.ask-type textarea{flex:1;font:inherit;font-size:clamp(18px,2.2vw,32px);border:2px solid #9FB6BD;border-radius:12px;padding:.4em .6em;color:#15303A;background:#F6F9FA;resize:none}
+.ask-status{margin-top:.6em;font-size:clamp(16px,1.8vw,26px);color:#58717B;min-height:1.2em}
+.ask-status.err{color:#B3261E}
+.d-answered{position:absolute;left:4vw;bottom:max(18px,env(safe-area-inset-bottom,0px));z-index:4;display:flex;align-items:center;gap:.7em;background:#FFFFFF;color:#15303A;border-radius:999px;padding:.35em .5em .35em 1em;font-size:clamp(15px,1.8vw,28px);font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:80vw}
+.d-answered span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.d-answered button{font:inherit;font-size:.85em;border:2px solid #0E6E73;color:#0E6E73;background:#fff;border-radius:999px;padding:.15em .8em;cursor:pointer}
+#v-display.has-msg .d-answered{bottom:calc(clamp(18px,3.2vw,56px)*2.4 + 24px)}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.preset{display:flex;flex-direction:column;align-items:flex-start;gap:6px;border:2px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);text-align:left;font-size:.92rem}
+.preset[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.preset i{display:flex;gap:3px}
+.preset i b{width:16px;height:16px;border-radius:4px;border:1px solid rgba(0,0,0,.15)}
+.colors{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.colors label{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--bg)}
+.colors input[type=color]{width:44px;height:34px;border:0;padding:0;background:none;cursor:pointer}
+.colors span{display:flex;flex-direction:column;font-size:.92rem;font-weight:700}
+.colors small{font-weight:400;color:var(--muted);font-family:var(--mono)}
+.lk-prev{border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.lk-bar{font-weight:700;padding:3px 10px;font-size:.85rem;white-space:nowrap;overflow:hidden}
+.lk-body{padding:8px 12px 12px;text-align:center}
+.lk-body small{display:block;font-size:.85rem;font-weight:700}
+.lk-body div{font-family:var(--mono);font-weight:700;font-size:2.4rem;letter-spacing:-.03em;line-height:1.1}
+.lk-warn{color:var(--warn);font-size:.9rem;margin:0}
+@media (max-width:520px){.colors{grid-template-columns:1fr}}
+.mitem{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:6px 6px 6px 10px;background:var(--bg)}
+.mitem span{flex:1;min-width:0;overflow-wrap:anywhere}
+.mitem em{font-style:normal;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.mitem.alert{border-color:var(--alert)}
+.mitem.alert span::before{content:"Alert · ";color:var(--alert);font-weight:700}
+.d-off{font-size:clamp(18px,3vw,40px);color:var(--dmuted);text-align:center;max-width:30ch}
+
+/* ---------- dialogs ---------- */
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);padding:0;width:min(520px,94vw);max-height:90vh}
+dialog::backdrop{background:rgba(10,25,30,.45)}
+dialog form{padding:20px;display:flex;flex-direction:column;gap:14px}
+dialog h2{margin:0;font-size:1.25rem}
+.field{display:flex;flex-direction:column;gap:5px}
+.field > span{font-weight:700;font-size:.95rem}
+.field .hint{color:var(--muted);font-size:.86rem}
+.field input[type=text],.field input[type=time],.field input[type=number],.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px;width:100%}
+.dur{display:flex;gap:8px;align-items:center}
+.dur input{width:5.2em !important}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg label{flex:1;text-align:center;padding:9px 6px;cursor:pointer;border-right:1px solid var(--line);font-size:.95rem}
+.seg label:last-child{border-right:0}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--accent);color:var(--accent-ink);font-weight:700}
+.seg label:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:-3px}
+.checks{display:flex;flex-wrap:wrap;gap:8px 18px}
+.checks label{display:inline-flex;gap:8px;align-items:center}
+.dlg-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding-top:4px}
+.dlg-acts .left{margin-right:auto}
+.linkbox{display:flex;gap:6px}
+.linkbox input{flex:1;font-family:var(--mono);font-size:.85rem}
+
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;max-width:90vw;z-index:50;font-size:.95rem}
+
+@media (max-width:620px){
+  .row{grid-template-columns:auto 1fr}
+  .row .live{grid-column:1 / 3;text-align:left;font-size:2.2rem}
+  .row .acts{grid-column:1 / 3}
+}
+</style>
+</head>
+<body>
+
+<!-- CONTROL -->
+<section id="v-control" hidden>
+  <div class="wrap">
+    <div class="top">
+      <h1>Sim Lab Clock</h1>
+      <span class="sync" id="sync" data-s="wait"><i></i><span>Connecting…</span></span>
+      <span class="spacer"></span>
+      <a class="btn" href="#screens" id="to-screens">Show a screen here</a>
+      <button class="btn" id="btn-out">Sign out</button>
+      <button class="btn" id="btn-msg-all">Message all screens</button>
+      <button class="btn primary" id="btn-add">Add screens</button>
+    </div>
+    <section class="inbox" id="inbox" hidden>
+      <div class="inbox-head"><h2>Questions and answers</h2><span class="count" id="ib-count"></span>
+        <button class="btn small" id="ib-clear">Delete closed</button></div>
+      <div id="ib-list"></div>
+    </section>
+    <div class="group" id="group" hidden>
+      <label><input type="checkbox" id="sel-all"> Select all</label>
+      <span class="count" id="sel-count">None selected</span>
+      <button class="btn small primary" data-g="start">Start</button>
+      <button class="btn small" data-g="pause">Pause</button>
+      <button class="btn small" data-g="stop">Stop</button>
+      <button class="btn small" data-g="reset">Reset</button>
+      <button class="btn small" data-g="edit">Set time…</button>
+      <button class="btn small" data-g="msg">Messages…</button>
+      <button class="btn small" data-g="look">Colors…</button>
+      <button class="btn small" data-g="ask">Ask…</button>
+    </div>
+    <div class="list" id="list"></div>
+  </div>
+</section>
+
+<!-- LOGIN -->
+<section id="v-login" hidden>
+  <div class="wrap" style="max-width:440px">
+    <div class="top"><h1>Sim Lab Clock</h1></div>
+    <form id="f-login" class="notice" style="display:flex;flex-direction:column;gap:14px;padding:18px">
+      <strong>Staff sign-in</strong>
+      <span style="color:var(--muted)">Room screens don’t need this. Sign in to run the clocks.</span>
+      <label class="field"><span>Email</span><input type="email" id="l-email" autocomplete="username" required style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px"></label>
+      <label class="field"><span>Password</span><input type="password" id="l-pass" autocomplete="current-password" required style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px"></label>
+      <button class="btn primary">Sign in</button>
+      <span id="l-err" role="alert" style="color:var(--alert)"></span>
+    </form>
+    <p><a href="#screens" style="color:var(--accent)">Show a room screen on this computer instead</a></p>
+  </div>
+</section>
+
+<!-- PICKER -->
+<section id="v-picker" hidden>
+  <div class="wrap">
+    <div class="top">
+      <h1>Choose this room’s screen</h1>
+      <span class="spacer"></span>
+      <a class="btn" href="#control" id="to-control" hidden>Control panel</a>
+    </div>
+    <p style="color:var(--muted);margin-top:-6px">Pick the screen for this display. Then use Full screen.</p>
+    <div class="pick" id="pick"></div>
+  </div>
+</section>
+
+<!-- DISPLAY -->
+<section id="v-display" hidden>
+  <div class="d-ticker" id="d-ticker" hidden><div class="tk-track" id="tk-track"></div></div>
+  <div class="d-frame" aria-hidden="true"></div>
+  <div class="d-name" id="d-name"></div>
+  <div class="d-tools">
+    <button id="d-fs">Full screen</button>
+    <a href="#screens">Change screen</a>
+  </div>
+  <div class="d-mode" id="d-mode"></div>
+  <div class="d-time" id="d-time"></div>
+  <div class="d-status" id="d-status" hidden></div>
+  <div class="d-off" id="d-off" hidden></div>
+  <div class="d-msg" id="d-msg" hidden></div>
+  <div class="d-answered" id="d-answered" hidden><span id="ans-text"></span><button type="button" id="ans-change">Change</button></div>
+  <div class="d-ask" id="d-ask" hidden role="dialog" aria-modal="true" aria-labelledby="ask-q">
+    <div class="ask-card">
+      <div class="ask-from"><span>Message from staff</span><span id="ask-n"></span></div>
+      <div class="ask-q" id="ask-q"></div>
+      <div class="ask-btns" id="ask-btns"></div>
+      <div class="ask-type" id="ask-type"><textarea id="ask-input" rows="2" maxlength="300" placeholder="Type your answer"></textarea><button type="button" class="ask-send" id="ask-send">Send</button></div>
+      <div class="ask-status" id="ask-status" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ADD -->
+<dialog id="dlg-add">
+  <form method="dialog" id="f-add">
+    <h2>Add screens</h2>
+    <label class="field"><span>Screen names</span>
+      <textarea id="add-names" rows="3" placeholder="108, 109, 115-118, Debrief room"></textarea>
+      <span class="hint">Separate with commas or new lines. A number becomes “Room 108”; a range like 115-118 adds each room.</span>
+    </label>
+    <div class="dlg-acts">
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" id="add-go" value="ok">Add screens</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ASK -->
+<dialog id="dlg-ask">
+  <form method="dialog" id="f-ask">
+    <h2 id="a-title">Send a question</h2>
+    <label class="field"><span>Message or question</span>
+      <textarea id="a-text" rows="3" maxlength="200" placeholder="e.g. Are you ready for the patient handoff?"></textarea></label>
+    <div class="field"><span>How the room answers</span>
+      <div class="seg" role="radiogroup">
+        <label><input type="radio" name="akind" value="buttons" checked>Buttons</label>
+        <label><input type="radio" name="akind" value="text">Typed</label>
+        <label><input type="radio" name="akind" value="both">Both</label>
+        <label><input type="radio" name="akind" value="ok">“Got it”</label>
+      </div>
+    </div>
+    <div class="field" id="a-choices-wrap"><span>Answer buttons</span>
+      <input type="text" id="a-choices" value="Yes, No" maxlength="120" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px">
+      <span class="hint">Separate with commas, up to 4 buttons.</span>
+      <div class="chips" id="a-chips">
+        <button type="button">Yes, No</button><button type="button">Ready, Need 5 minutes</button>
+        <button type="button">Yes, No, Need help</button><button type="button">On track, Behind, Need instructor</button>
+      </div>
+    </div>
+    <label style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" id="a-chime" checked> Play a chime on the room screen</label>
+    <div class="dlg-acts">
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" value="ok">Send</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- COLORS -->
+<dialog id="dlg-look">
+  <form method="dialog" id="f-look">
+    <h2 id="lk-title">Colors</h2>
+    <p class="hint" style="margin:-6px 0 0;color:var(--muted)">Changes the look only. The clock keeps running.</p>
+    <div class="field"><span>Start from a style</span>
+      <div class="presets" id="lk-presets"></div>
+    </div>
+    <div class="field"><span>Custom colors</span>
+      <div class="colors">
+        <label><input type="color" id="lk-bg"><span>Background<small id="lk-bg-v"></small></span></label>
+        <label><input type="color" id="lk-clock"><span>Clock numbers<small id="lk-clock-v"></small></span></label>
+        <label><input type="color" id="lk-text"><span>Labels and messages<small id="lk-text-v"></small></span></label>
+        <label><input type="color" id="lk-bar"><span>Message bar<small id="lk-bar-v"></small></span></label>
+      </div>
+    </div>
+    <div class="field"><span>Preview</span>
+      <div class="lk-prev" id="lk-prev"><div class="lk-bar" id="lk-pbar">Debrief in Room 115 at 10:30 • Bring your badge</div>
+        <div class="lk-body"><small id="lk-pname">Room 108 · Scenario time</small><div id="lk-ptime">7:00:00 AM</div></div></div>
+    </div>
+    <p class="lk-warn" id="lk-warn" hidden></p>
+    <div class="dlg-acts">
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" value="ok">Apply</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- MESSAGES -->
+<dialog id="dlg-msg">
+  <form method="dialog" id="f-msg">
+    <h2 id="m-title">Messages</h2>
+    <p class="hint" style="margin:-6px 0 0;color:var(--muted)">Messages scroll across the top of the screen. The clock keeps running.</p>
+    <div class="mlist" id="m-list"></div>
+    <label class="field"><span>New message</span><input type="text" id="m-text" maxlength="120" placeholder="e.g. Debrief in Room 115 at 10:30"></label>
+    <label style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" id="m-alert"> Show as an alert (red)</label>
+    <div class="dlg-acts">
+      <button class="btn danger left" type="button" id="m-clear">Clear all</button>
+      <button class="btn" value="cancel" formnovalidate>Done</button>
+      <button class="btn primary" type="button" id="m-add">Add message</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- EDIT -->
+<dialog id="dlg-edit">
+  <form method="dialog" id="f-edit">
+    <h2 id="e-title">Edit screen</h2>
+    <label class="field" id="e-name-wrap"><span>Screen name</span><input type="text" id="e-name" maxlength="40"></label>
+    <div class="field"><span>Clock type</span>
+      <div class="seg" role="radiogroup">
+        <label><input type="radio" name="mode" value="tod">Scenario time</label>
+        <label><input type="radio" name="mode" value="down">Countdown</label>
+        <label><input type="radio" name="mode" value="up">Stopwatch</label>
+      </div>
+    </div>
+    <label class="field" id="e-tod-wrap"><span>Starting time of day</span>
+      <input type="time" id="e-tod" step="1" value="07:00:00">
+      <span class="hint">The clock shows this time, then runs forward at normal speed.</span>
+    </label>
+    <div class="field" id="e-dur-wrap"><span>Countdown length</span>
+      <div class="dur">
+        <input type="number" id="e-h" min="0" max="23" value="0" aria-label="Hours"> h
+        <input type="number" id="e-m" min="0" max="59" value="15" aria-label="Minutes"> min
+        <input type="number" id="e-s" min="0" max="59" value="0" aria-label="Seconds"> sec
+      </div>
+    </div>
+    <div class="field" id="e-end-wrap"><span>Scenario ends</span>
+      <div class="seg" role="radiogroup">
+        <label><input type="radio" name="endmode" value="none" checked>No end</label>
+        <label id="e-end-at-opt"><input type="radio" name="endmode" value="at">At a time</label>
+        <label><input type="radio" name="endmode" value="after">After a length</label>
+      </div>
+      <div id="e-end-at-wrap"><input type="time" id="e-end-at" step="1" value="07:30:00" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px;margin-top:6px"></div>
+      <div class="dur" id="e-end-len-wrap" style="margin-top:6px">
+        <input type="number" id="e-eh" min="0" max="23" value="0" aria-label="End after hours" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px"> h
+        <input type="number" id="e-em" min="0" max="59" value="30" aria-label="End after minutes" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px"> min
+        <input type="number" id="e-es" min="0" max="59" value="0" aria-label="End after seconds" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px"> sec
+      </div>
+      <span class="hint" id="e-end-hint"></span>
+    </div>
+    <div class="field" id="e-warn-wrap"><span>Warning before the end</span>
+      <select id="e-warn">
+        <option value="0">No warning</option>
+        <option value="1" selected>1 minute before (numbers turn amber)</option>
+        <option value="2">2 minutes before</option>
+        <option value="5">5 minutes before</option>
+        <option value="10">10 minutes before</option>
+      </select>
+    </div>
+    <label class="field"><span>Message on screen</span>
+      <input type="text" id="e-msg" maxlength="90" placeholder="Optional, e.g. Scenario 2: post-op care">
+    </label>
+    <div class="checks">
+      <label id="e-h24-wrap"><input type="checkbox" id="e-h24"> 24-hour time</label>
+      <label id="e-sec-wrap"><input type="checkbox" id="e-sec" checked> Show seconds</label>
+      <label id="e-over-wrap"><input type="checkbox" id="e-over"> Keep counting after zero</label>
+      <label id="e-stop-wrap"><input type="checkbox" id="e-stop" checked> Freeze the clock at the end</label>
+    </div>
+    <div class="field" id="e-link-wrap"><span>Screen link</span>
+      <div class="linkbox"><input type="text" id="e-link" readonly><button class="btn small" type="button" id="e-copy">Copy</button></div>
+      <span class="hint">Open this link on the room’s computer, or pick the screen from “Show a screen here”.</span>
+    </div>
+    <p class="hint" id="e-reset-note" style="margin:0;color:var(--muted)">Changing the clock type or time puts the clock back to Ready.</p>
+    <div class="dlg-acts">
+      <button class="btn danger left" type="button" id="e-del">Delete screen</button>
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" value="ok" id="e-save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="config.js"></script>
+<script>(function(){
+"use strict";
+/* Firebase settings live in config.js next to this file, so updates to
+   index.html never need them pasted again. No config.js = demo mode. */
+const FIREBASE_CONFIG = window.FIREBASE_CONFIG || {};
+
+const DEMO = !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.indexOf("PASTE")===0;
+const RESERVED = ["control","screens","login"];
+const DAY = 86400000;
+const S = { inbox:{}, seenQ:null, seenR:null, clocks:new Map(), user:null, authReady:false, status:"wait", selected:new Set(), view:"", displayId:"", editIds:[] };
+const chains = {};
+const $ = (id)=>document.getElementById(id);
+
+/* ---------- backend: Firebase, or demo (one computer) ---------- */
+const B = (function(){
+  if(DEMO){
+    const KEY="simclock-demo2"; let bc=null; try{ bc=new BroadcastChannel("simclock2"); }catch(e){}
+    const subs=[];
+    const read=()=>{ try{ const o=JSON.parse(localStorage.getItem(KEY)||"null"); if(o) return o;
+      const old=JSON.parse(localStorage.getItem("simclock-demo")||"{}"); return {clocks:old,inbox:{}}; }catch(e){ return {clocks:{},inbox:{}}; } };
+    const at=(o,path)=>path.split("/").reduce((x,k)=>x&&x[k],o);
+    const fire=()=>{ const o=read(); subs.forEach(s=>s.cb(at(o,s.path)||{})); };
+    const save=(o)=>{ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} if(bc) bc.postMessage(1); fire(); };
+    const put=(path,v)=>{ const o=read(), ks=path.split("/"); let x=o; for(let i=0;i<ks.length-1;i++){ x[ks[i]]=x[ks[i]]||{}; x=x[ks[i]]; } if(v===null) delete x[ks[ks.length-1]]; else x[ks[ks.length-1]]=v; save(o); return Promise.resolve(); };
+    if(bc) bc.onmessage=fire;
+    window.addEventListener("storage", e=>{ if(e.key===KEY) fire(); });
+    const api={
+      now:()=>Date.now(),
+      start(onData, onStatus){ subs.push({path:"clocks",cb:onData}); onStatus("live"); onData(read().clocks||{}); S.user={email:"demo"}; S.authReady=true; },
+      on(path,cb){ subs.push({path,cb}); cb(at(read(),path)||{}); },
+      setPath:put,
+      updatePath(path,v){ const cur=at(read(),path); if(!cur) return Promise.resolve(); const n=Object.assign({},cur); Object.keys(v).forEach(k=>{ if(v[k]===null) delete n[k]; else n[k]=v[k]; }); return put(path,n); },
+      signIn(){ return Promise.resolve(); }, signOut(){ return Promise.resolve(); }
+    };
+    return api;
+  }
+  let offset=0, db=null, auth=null;
+  return {
+    now:()=>Date.now()+offset,
+    start(onData, onStatus){
+      try{ firebase.initializeApp(FIREBASE_CONFIG); }catch(e){ onStatus("none"); return; }
+      db=firebase.database(); auth=firebase.auth();
+      db.ref(".info/serverTimeOffset").on("value", s=>{ offset = s.val()||0; });
+      db.ref(".info/connected").on("value", s=>onStatus(s.val() ? "live" : "error"));
+      db.ref("clocks").on("value", s=>onData(s.val()||{}), ()=>onStatus("none"));
+      auth.onAuthStateChanged(u=>{ S.user=u; S.authReady=true; route(); });
+    },
+    on(path,cb){ if(db) db.ref(path).on("value", s=>cb(s.val()||{}), ()=>{}); },
+    setPath(path,v){ return v===null ? db.ref(path).remove() : db.ref(path).set(v); },
+    updatePath(path,v){ return db.ref(path).update(v); },
+    signIn(email,pass){ return auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(()=>auth.signInWithEmailAndPassword(email,pass)); },
+    signOut(){ return auth.signOut(); }
+  };
+})();
+B.set=(id,v)=>B.setPath("clocks/"+id,v);
+B.remove=(id)=>B.setPath("clocks/"+id,null);
+B.update=(id,v)=>B.updatePath("clocks/"+id,v);
+
+/* ---------- time math ---------- */
+function elapsedOf(c, now){ return (c.elapsedMs||0) + (c.running ? Math.max(0, now - (c.startedAt||now)) : 0); }
+function pad(n){ return String(n).padStart(2,"0"); }
+function fmtDur(ms){ const t=Math.floor(Math.abs(ms)/1000), h=Math.floor(t/3600), m=Math.floor(t%3600/60), s=t%60; return (h ? h+":"+pad(m) : pad(m))+":"+pad(s); }
+function endElOf(c){
+  const m=c.mode||"tod";
+  if(m==="down") return c.setMs||0;
+  if(c.endMode==="after" && c.endMs>0) return c.endMs;
+  if(c.endMode==="at" && m==="tod" && typeof c.endMs==="number"){ const d=(((c.endMs-(c.setMs||0))%DAY)+DAY)%DAY; return d||DAY; }
+  return null;
+}
+function stopsAtEnd(c){ return (c.mode||"tod")==="down" ? !c.overtime : c.endStop!==false; }
+function fmtTod(ms,c){
+  ms=((ms%DAY)+DAY)%DAY; const t=Math.floor(ms/1000), H=Math.floor(t/3600), M=Math.floor(t%3600/60), Sx=t%60;
+  let s = c&&c.h24 ? pad(H)+":"+pad(M) : (H%12||12)+":"+pad(M);
+  if(Sx) s+=":"+pad(Sx); if(!(c&&c.h24)) s+=" "+(H<12?"AM":"PM"); return s;
+}
+function view(c, now){
+  let el=elapsedOf(c,now); const mode=c.mode||"tod", endEl=endElOf(c);
+  let ended=false, warn=false, rem=null;
+  if(endEl!=null){
+    rem=endEl-el; ended=rem<=0;
+    const wm=(c.warnMin==null?1:+c.warnMin)*60000;
+    warn=!ended && !!c.running && wm>0 && rem<=wm;
+    if(ended && stopsAtEnd(c)) el=endEl;
+  }
+  const left = rem!=null ? fmtDur(Math.ceil(Math.max(0,rem)/1000)*1000) : "";
+  if(mode==="tod"){
+    let ms=((c.setMs||0)+el)%DAY; if(ms<0) ms+=DAY;
+    const t=Math.floor(ms/1000), H=Math.floor(t/3600), M=Math.floor(t%3600/60), Sx=t%60;
+    let main, suffix="";
+    if(c.h24) main=pad(H)+":"+pad(M); else { main=(H%12===0?12:H%12)+":"+pad(M); suffix=H<12?"AM":"PM"; }
+    if(c.showSec!==false) main+=":"+pad(Sx);
+    let label="Scenario time";
+    if(ended) label="Scenario complete";
+    else if(warn) label="Ending in "+left;
+    else if(endEl!=null) label = c.endMode==="at" ? "Scenario time · ends at "+fmtTod(c.endMs,c) : "Scenario time · ends in "+left;
+    return {main,suffix,label,warn,done:ended};
+  }
+  if(mode==="down"){
+    const r=(c.setMs||0)-elapsedOf(c,now);
+    if(r<=0) return c.overtime ? {main:"+"+fmtDur(-r),suffix:"",label:"Time’s up · over time",done:true} : {main:fmtDur(0),suffix:"",label:"Time’s up",done:true};
+    return {main:fmtDur(Math.ceil(r/1000)*1000),suffix:"",label:"Time remaining",warn};
+  }
+  let label="Elapsed";
+  if(ended) label="Scenario complete"; else if(warn) label="Ending in "+left; else if(endEl!=null) label="Elapsed · ends in "+left;
+  return {main:fmtDur(Math.max(0,el)),suffix:"",label,warn,done:ended};
+}
+function modeName(m){ return m==="down"?"Countdown":m==="up"?"Stopwatch":"Scenario time"; }
+function statusName(s){ return ({ready:"Ready",running:"Running",paused:"Paused",stopped:"Stopped"})[s]||"Ready"; }
+function setDesc(c){
+  if(c.mode==="down") return "Countdown from "+fmtDur(c.setMs||0);
+  const end = c.endMode==="after"&&c.endMs>0 ? " · ends after "+fmtDur(c.endMs) : (c.endMode==="at"&&c.mode!=="up"&&typeof c.endMs==="number") ? " · ends at "+fmtTod(c.endMs,c) : "";
+  if(c.mode==="up") return "Stopwatch"+end;
+  return "Scenario time from "+fmtTod(c.setMs||0,c)+end;
+}
+
+/* ---------- actions ---------- */
+function act(c, kind, now){
+  const n=Object.assign({},c);
+  if(kind==="start"){ if(c.running) return null; n.running=true; n.startedAt=now; n.status="running"; if(c.status==="stopped") n.elapsedMs=0; }
+  else if(kind==="pause"){ if(!c.running) return null; n.elapsedMs=elapsedOf(c,now); n.running=false; n.status="paused"; }
+  else if(kind==="stop"){ n.running=false; n.elapsedMs=0; n.status="stopped"; }
+  else if(kind==="reset"){ n.elapsedMs=0; n.startedAt=now; n.status=c.running?"running":"ready"; }
+  else if(kind==="plus"||kind==="minus"){
+    const d=(kind==="plus"?1:-1)*60000*(c.mode==="down"?-1:1);
+    let e=elapsedOf(c,now)+d;
+    if(c.mode==="up") e=Math.max(0,e);
+    if(c.mode==="down") e=Math.min(e,c.setMs||0);
+    n.elapsedMs=e; n.startedAt=now;
+  } else return null;
+  return n;
+}
+function doAction(ids, kind){ const now=B.now(); ids.forEach(id=>{ const c=S.clocks.get(id); if(!c) return; const n=act(c,kind,now); if(n) writeClock(id,n); }); }
+
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,4200); }
+function failed(e){
+  const code=(e&&(e.code||e.message)||"")+"";
+  if(/permission/i.test(code)){ toast("You need to sign in as staff to change clocks."); S.user=null; route(); }
+  else toast("That change didn’t save. Check the connection and try again.");
+}
+function writeClock(id, next){
+  if(!S.user){ toast("Sign in as staff to change clocks."); return; }
+  next.updatedAt=B.now(); S.clocks.set(id,next); renderAll();
+  chains[id]=(chains[id]||Promise.resolve()).then(()=>B.set(id,next)).catch(failed);
+}
+function deleteClock(id){
+  S.clocks.delete(id); S.selected.delete(id); renderAll();
+  chains[id]=(chains[id]||Promise.resolve()).then(()=>B.remove(id)).then(()=>B.setPath("inbox/"+id,null)).catch(failed);
+}
+
+/* ---------- ids ---------- */
+function slug(name){
+  let s=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40);
+  if(!/^[a-z]/.test(s)||RESERVED.includes(s)) s="screen-"+s;
+  s=s.replace(/-+$/,""); if(s==="screen") s="screen-1";
+  let id=s,i=2; while(S.clocks.has(id)) id=s+"-"+(i++); return id;
+}
+function parseNames(text){
+  const out=[];
+  text.split(/[\n,;]+/).map(t=>t.trim()).filter(Boolean).forEach(t=>{
+    const r=t.match(/^(?:room\s*)?(\d{1,4})\s*[-–]\s*(\d{1,4})$/i);
+    if(r){ let a=+r[1],b=+r[2]; if(a>b)[a,b]=[b,a]; if(b-a>60) b=a+60; for(let n=a;n<=b;n++) out.push("Room "+n); }
+    else if(/^\d{1,4}$/.test(t)) out.push("Room "+t);
+    else out.push(t.slice(0,40));
+  });
+  return [...new Set(out)];
+}
+function newClock(name, order){ return {name,mode:"tod",setMs:7*3600000,elapsedMs:0,running:false,startedAt:0,status:"ready",h24:false,showSec:true,theme:"monitor",message:"",overtime:false,order}; }
+function linkFor(id){ return location.origin==="null" ? "#"+id : location.origin+location.pathname+"#"+id; }
+function sorted(){ return [...S.clocks.entries()].sort((a,b)=>(a[1].name||"").localeCompare(b[1].name||"",undefined,{numeric:true,sensitivity:"base"})); }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]); }
+
+/* ---------- routing ---------- */
+function route(){
+  const h=decodeURIComponent(location.hash.replace(/^#/,""));
+  if(h==="screens") S.view="picker";
+  else if(h && h!=="control" && h!=="login") { S.view="display"; S.displayId=h; }
+  else S.view = !S.authReady ? "wait" : (S.user ? "control" : "login");
+  $("v-control").hidden=S.view!=="control"; $("v-picker").hidden=S.view!=="picker";
+  $("v-display").hidden=S.view!=="display"; $("v-login").hidden=S.view!=="login"&&S.view!=="wait";
+  $("f-login").hidden = S.view==="wait";
+  if(S.view==="display") wake(); else unwake();
+  renderAll(); tick();
+}
+
+/* ---------- render ---------- */
+function renderAll(){ renderMsgList(); renderSync(); if(S.view==="control") renderControl(); else if(S.view==="picker") renderPicker(); else if(S.view==="display") renderDisplay(); }
+function renderSync(){
+  const el=$("sync"); el.dataset.s=S.status;
+  el.lastElementChild.textContent = DEMO ? "Demo mode (this computer only)" : ({wait:"Connecting…",live:"Live",error:"Reconnecting…",none:"Not connected"})[S.status];
+  $("btn-out").hidden = DEMO;
+}
+function renderControl(){
+  renderInbox();
+  const list=$("list"), items=sorted();
+  $("group").hidden=items.length<2;
+  if(S.status==="none"){ list.innerHTML='<div class="empty"><p>Can’t reach the clock database. Check the Firebase settings at the top of index.html.</p></div>'; return; }
+  if(!items.length){ list.innerHTML='<div class="empty"><p>No screens yet. Add one for each room or display that should show a clock.</p><button class="btn primary" data-empty-add>Add screens</button></div>'; return; }
+  list.innerHTML=items.map(([id,c])=>{
+    const st=c.status||"ready", run=!!c.running, main=run?"Pause":(st==="paused"?"Resume":"Start");
+    return '<div class="row" data-id="'+esc(id)+'" data-status="'+st+'">'+
+      '<input type="checkbox" aria-label="Select '+esc(c.name)+'" data-sel '+(S.selected.has(id)?"checked":"")+'>'+
+      '<div><div class="name">'+esc(c.name)+'<span class="pill">'+statusName(st)+'</span><span class="pill endpill">Ended</span></div>'+
+      '<div class="meta">'+esc(setDesc(c))+(c.message?' · “'+esc(c.message)+'”':'')+(tickerOf(c).length?' · '+tickerOf(c).length+' scrolling':'')+'</div></div>'+
+      '<div class="live" data-time-for="'+esc(id)+'"></div>'+
+      '<div class="acts">'+
+        '<button class="btn small'+(run?'':' primary')+'" data-a="'+(run?'pause':'start')+'">'+main+'</button>'+
+        '<button class="btn small" data-a="stop">Stop</button>'+
+        '<button class="btn small" data-a="reset">Reset</button>'+
+        '<button class="btn small" data-a="minus" aria-label="Minus one minute">−1 min</button>'+
+        '<button class="btn small" data-a="plus" aria-label="Plus one minute">+1 min</button>'+
+        '<span class="gap"></span>'+
+        '<button class="btn small" data-a="ask">Ask</button>'+
+        '<button class="btn small" data-a="look">Colors</button>'+
+        '<button class="btn small" data-a="msg">Messages'+(tickerOf(c).length?' ('+tickerOf(c).length+')':'')+'</button>'+
+        '<button class="btn small" data-a="edit">Edit</button>'+
+        '<a class="btn small" href="#'+encodeURIComponent(id)+'" target="_blank" rel="noopener">View screen</a>'+
+      '</div></div>';
+  }).join("");
+  const n=S.selected.size;
+  $("sel-count").textContent=n?n+" selected":"None selected";
+  $("sel-all").checked=n>0&&n===items.length; $("sel-all").indeterminate=n>0&&n<items.length;
+  document.querySelectorAll("[data-g]").forEach(b=>b.disabled=n===0);
+}
+function renderPicker(){
+  const items=sorted(), pick=$("pick");
+  $("to-control").hidden=false;
+  if(S.status==="none"){ pick.innerHTML='<div class="empty" style="grid-column:1/-1"><p>Can’t reach the clock database. Check the network connection.</p></div>'; return; }
+  if(!items.length){ pick.innerHTML='<div class="empty" style="grid-column:1/-1"><p>'+(S.status==="wait"?"Loading screens…":"No screens have been set up yet. Staff can add them in the control panel.")+'</p></div>'; return; }
+  pick.innerHTML=items.map(([id,c])=>'<a href="#'+encodeURIComponent(id)+'">'+esc(c.name)+'<span>'+esc(modeName(c.mode))+'</span></a>').join("");
+}
+function renderDisplay(){
+  const c=S.clocks.get(S.displayId), off=$("d-off"), d=$("v-display");
+  ["d-mode","d-time"].forEach(x=>$(x).hidden=!c);
+  if(!c){
+    $("d-status").hidden=true; $("d-msg").hidden=true; renderTicker(null); applyLook(d, null); d.classList.remove("ended"); $("d-ask").hidden=true; $("d-answered").hidden=true; $("d-name").textContent=""; d.dataset.dtheme="monitor"; off.hidden=false;
+    off.textContent = S.status==="wait" ? "Connecting…" : S.status==="none" ? "Can’t reach the clock. Check the network connection." : "This screen isn’t set up. Choose another with “Change screen”.";
+    return;
+  }
+  off.hidden=true; applyLook(d, c); $("d-name").textContent=c.name||"";
+  const msg=$("d-msg"); msg.hidden=!c.message; msg.textContent=c.message||"";
+  const st=c.status||"ready", s=$("d-status"); s.hidden=st==="running"; s.className="d-status "+st; s.textContent=statusName(st);
+  d.classList.toggle("d-dim",st==="stopped");
+  d.classList.toggle("has-msg",!!c.message);
+  renderAsk();
+  renderTicker(c);
+}
+function renderTicker(c){
+  const list=c?tickerOf(c):[], tk=$("d-ticker"), d=$("v-display");
+  tk.hidden=!list.length; d.classList.toggle("has-ticker",!!list.length);
+  const sig=JSON.stringify(list);
+  if(tk._sig===sig) return; tk._sig=sig;
+  if(!list.length){ $("tk-track").innerHTML=""; return; }
+  const one=list.map(m=>'<span class="tk-item'+(m.alert?' alert':'')+'">'+esc(m.t)+'</span>').join('<span class="tk-sep" aria-hidden="true">•</span>');
+  $("tk-track").innerHTML='<span class="tk-copy">'+one+'</span><span class="tk-copy" aria-hidden="true">'+one+'</span>';
+  requestAnimationFrame(()=>{
+    const copy=$("tk-track").firstChild; if(!copy) return;
+    const speed=parseFloat(getComputedStyle(tk).fontSize)*3.2;
+    $("tk-track").style.setProperty("--tk-dur", Math.max(8, copy.offsetWidth/speed)+"s");
+  });
+}
+function tick(){
+  const now=B.now();
+  if(S.view==="control"){
+    document.querySelectorAll("[data-time-for]").forEach(el=>{
+      const c=S.clocks.get(el.dataset.timeFor); if(!c) return;
+      const v=view(c,now), html=esc(v.main)+(v.suffix?'<small>'+v.suffix+'</small>':'');
+      if(el._h!==html){ el.innerHTML=html; el._h=html; }
+      el.classList.toggle("warn",!!v.warn); el.classList.toggle("done",!!v.done);
+      const row=el.closest(".row"); if(row) row.classList.toggle("ended",!!v.done);
+    });
+  } else if(S.view==="display"){
+    const c=S.clocks.get(S.displayId); if(!c) return;
+    const v=view(c,now), el=$("d-time"), html=esc(v.main)+(v.suffix?'<small>'+v.suffix+'</small>':'');
+    if(el._h!==html){ el.innerHTML=html; el._h=html; }
+    el.classList.toggle("long",v.main.length>8); el.classList.toggle("warn",!!v.warn); el.classList.toggle("done",!!v.done);
+    $("v-display").classList.toggle("ended",!!v.done);
+    if($("d-mode").textContent!==v.label) $("d-mode").textContent=v.label;
+  }
+}
+
+/* ---------- dialogs ---------- */
+function openAdd(){ $("add-names").value=""; $("dlg-add").showModal(); }
+$("f-add").addEventListener("submit", e=>{
+  if(!e.submitter||e.submitter.value!=="ok") return;
+  const names=parseNames($("add-names").value);
+  if(!names.length){ e.preventDefault(); toast("Type at least one screen name."); return; }
+  let order=Date.now(); names.forEach(n=>writeClock(slug(n),newClock(n,order++)));
+  toast(names.length===1?"Added "+names[0]+".":"Added "+names.length+" screens.");
+});
+function endModeVal(){ return (document.querySelector('input[name=endmode]:checked')||{}).value||"none"; }
+function modeUI(){
+  const m=(document.querySelector('input[name=mode]:checked')||{}).value||"tod";
+  $("e-tod-wrap").hidden=m!=="tod"; $("e-h24-wrap").hidden=m!=="tod"; $("e-sec-wrap").hidden=m!=="tod";
+  $("e-dur-wrap").hidden=m!=="down"; $("e-over-wrap").hidden=m!=="down";
+  $("e-end-wrap").hidden=m==="down"; $("e-end-at-opt").hidden=m!=="tod";
+  if(m==="up" && endModeVal()==="at") document.querySelector('input[name=endmode][value=after]').checked=true;
+  const em=endModeVal();
+  $("e-end-at-wrap").hidden=!(m==="tod"&&em==="at"); $("e-end-len-wrap").hidden=!(m!=="down"&&em==="after");
+  $("e-stop-wrap").hidden = m==="down" || em==="none";
+  $("e-warn-wrap").hidden = m!=="down" && em==="none";
+  $("e-end-hint").textContent = m==="down" ? "" : em==="at" ? "Scenario time when it ends, e.g. starts 7:00 AM, ends 7:45 AM." : em==="after" ? "How long after Start the scenario ends." : "";
+}
+document.querySelectorAll('input[name=mode],input[name=endmode]').forEach(r=>r.addEventListener("change",modeUI));
+function openEdit(ids){
+  S.editIds=ids; const multi=ids.length>1, c=S.clocks.get(ids[0]); if(!c) return;
+  $("e-title").textContent=multi?"Set time on "+ids.length+" screens":"Edit "+c.name;
+  $("e-name-wrap").hidden=multi; $("e-link-wrap").hidden=multi; $("e-del").hidden=multi;
+  $("e-reset-note").textContent=multi?"All selected screens get these settings and go back to Ready, so you can start them together.":"Changing the clock type or time puts the clock back to Ready.";
+  $("e-name").value=c.name||"";
+  document.querySelectorAll('input[name=mode]').forEach(r=>r.checked=r.value===(c.mode||"tod"));
+  const t=Math.floor((c.mode==="tod"?c.setMs:7*3600000)/1000);
+  $("e-tod").value=pad(Math.floor(t/3600))+":"+pad(Math.floor(t%3600/60))+":"+pad(t%60);
+  const u=Math.floor((c.mode==="down"?c.setMs:15*60000)/1000);
+  $("e-h").value=Math.floor(u/3600); $("e-m").value=Math.floor(u%3600/60); $("e-s").value=u%60;
+  $("e-msg").value=c.message||"";
+  $("e-h24").checked=!!c.h24; $("e-sec").checked=c.showSec!==false; $("e-over").checked=!!c.overtime;
+  const em=c.endMode||"none"; document.querySelectorAll('input[name=endmode]').forEach(r=>r.checked=r.value===em);
+  const ea=Math.floor((em==="at"&&typeof c.endMs==="number"?c.endMs:(c.setMs||7*3600000)+30*60000)%DAY/1000);
+  $("e-end-at").value=pad(Math.floor(ea/3600))+":"+pad(Math.floor(ea%3600/60))+":"+pad(ea%60);
+  const el2=Math.floor((em==="after"&&c.endMs>0?c.endMs:30*60000)/1000);
+  $("e-eh").value=Math.floor(el2/3600); $("e-em").value=Math.floor(el2%3600/60); $("e-es").value=el2%60;
+  $("e-warn").value=String(c.warnMin==null?1:c.warnMin); if(!$("e-warn").value) $("e-warn").value="1";
+  $("e-stop").checked=c.endStop!==false;
+  $("e-link").value=linkFor(ids[0]); modeUI(); $("dlg-edit").showModal();
+}
+$("f-edit").addEventListener("submit", e=>{
+  if(!e.submitter||e.submitter.value!=="ok") return;
+  const mode=(document.querySelector('input[name=mode]:checked')||{}).value||"tod"; let setMs=0;
+  if(mode==="tod"){ const p=($("e-tod").value||"07:00:00").split(":").map(Number); setMs=((p[0]||0)*3600+(p[1]||0)*60+(p[2]||0))*1000; }
+  if(mode==="down"){ setMs=(Math.max(0,+$("e-h").value||0)*3600+Math.max(0,+$("e-m").value||0)*60+Math.max(0,+$("e-s").value||0))*1000;
+    if(setMs<=0){ e.preventDefault(); toast("Set a countdown longer than zero."); return; } }
+  let endMode = mode==="down" ? "none" : endModeVal(), endMs=null;
+  if(endMode==="at" && mode!=="tod") endMode="none";
+  if(endMode==="at"){ const p=($("e-end-at").value||"").split(":").map(Number); endMs=((p[0]||0)*3600+(p[1]||0)*60+(p[2]||0))*1000;
+    if(endMs===setMs){ e.preventDefault(); toast("The end time matches the start time. Pick a later end time."); return; } }
+  if(endMode==="after"){ endMs=(Math.max(0,+$("e-eh").value||0)*3600+Math.max(0,+$("e-em").value||0)*60+Math.max(0,+$("e-es").value||0))*1000;
+    if(endMs<=0){ e.preventDefault(); toast("Set a scenario length longer than zero."); return; } }
+  const multi=S.editIds.length>1, now=B.now();
+  S.editIds.forEach(id=>{
+    const c=S.clocks.get(id); if(!c) return;
+    const n=Object.assign({},c,{mode,setMs,message:$("e-msg").value.trim().slice(0,90),h24:$("e-h24").checked,showSec:$("e-sec").checked,overtime:$("e-over").checked,
+      endMode, endMs, warnMin:+$("e-warn").value||0, endStop:$("e-stop").checked});
+    if(!multi){ const nm=$("e-name").value.trim(); if(nm) n.name=nm.slice(0,40); }
+    if(multi||mode!==c.mode||setMs!==c.setMs){ n.running=false; n.elapsedMs=0; n.startedAt=now; n.status="ready"; }
+    writeClock(id,n);
+  });
+});
+$("e-del").addEventListener("click", ()=>{
+  const id=S.editIds[0], c=S.clocks.get(id); if(!c) return;
+  if(confirm("Delete the screen “"+c.name+"”? Any room showing it will go blank.")){ $("dlg-edit").close(); deleteClock(id); }
+});
+$("e-copy").addEventListener("click", ()=>{
+  const inp=$("e-link"); inp.select();
+  (navigator.clipboard?navigator.clipboard.writeText(inp.value):Promise.reject()).then(()=>toast("Link copied."),()=>toast("Select the link and copy it."));
+});
+
+/* ---------- scrolling messages ---------- */
+function tickerOf(c){
+  const t=c&&c.ticker; if(!t) return [];
+  return (Array.isArray(t)?t:Object.values(t)).filter(m=>m&&typeof m.t==="string"&&m.t);
+}
+function setTicker(ids, fn){
+  if(!S.user){ toast("Sign in as staff to change messages."); return; }
+  const now=B.now();
+  ids.forEach(id=>{
+    const c=S.clocks.get(id); if(!c) return;
+    const list=fn(tickerOf(c)).slice(0,10);
+    S.clocks.set(id, Object.assign({},c,{ticker:list,updatedAt:now}));
+    chains[id]=(chains[id]||Promise.resolve()).then(()=>B.update(id,{ticker:list.length?list:null,updatedAt:now})).catch(failed);
+  });
+  renderAll(); renderMsgList();
+}
+function openMsg(ids){
+  S.msgIds=ids.filter(id=>S.clocks.has(id)); if(!S.msgIds.length) return;
+  const all=S.msgIds.length===S.clocks.size && S.clocks.size>1;
+  $("m-title").textContent = S.msgIds.length===1 ? "Messages: "+S.clocks.get(S.msgIds[0]).name : all ? "Messages: all screens" : "Messages: "+S.msgIds.length+" screens";
+  $("m-text").value=""; $("m-alert").checked=false; renderMsgList(); $("dlg-msg").showModal(); $("m-text").focus();
+}
+function renderMsgList(){
+  if(!$("dlg-msg").open || !S.msgIds) return;
+  const ids=S.msgIds.filter(id=>S.clocks.has(id)), seen=new Map();
+  ids.forEach(id=>tickerOf(S.clocks.get(id)).forEach(m=>{ const k=(m.alert?"1":"0")+m.t; seen.set(k,{m,n:(seen.has(k)?seen.get(k).n:0)+1}); }));
+  const multi=ids.length>1;
+  $("m-list").innerHTML = seen.size ? [...seen.entries()].map(([k,v])=>
+    '<div class="mitem'+(v.m.alert?' alert':'')+'"><span>'+esc(v.m.t)+'</span>'+(multi&&v.n<ids.length?'<em>on '+v.n+' of '+ids.length+'</em>':'')+
+    '<button type="button" class="btn small" data-mk="'+esc(k)+'" aria-label="Remove message">Remove</button></div>').join("")
+    : '<p style="margin:0;color:var(--muted)">No scrolling messages yet.</p>';
+  $("m-clear").hidden=!seen.size;
+}
+function addMsg(){
+  const t=$("m-text").value.trim().slice(0,120); if(!t){ $("m-text").focus(); return; }
+  const m={t, alert:$("m-alert").checked};
+  setTicker(S.msgIds, list=>list.some(x=>x.t===t&&!!x.alert===m.alert)?list:list.concat([m]));
+  $("m-text").value=""; $("m-alert").checked=false; $("m-text").focus();
+}
+$("m-add").addEventListener("click", addMsg);
+$("m-text").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addMsg(); } });
+$("m-list").addEventListener("click", e=>{
+  const b=e.target.closest("[data-mk]"); if(!b) return; const k=b.dataset.mk;
+  setTicker(S.msgIds, list=>list.filter(x=>((x.alert?"1":"0")+x.t)!==k));
+});
+$("m-clear").addEventListener("click", ()=>{ if(confirm("Remove all scrolling messages from these screens?")) setTicker(S.msgIds, ()=>[]); });
+$("btn-msg-all").addEventListener("click", ()=>{ if(!S.clocks.size) return toast("Add screens first."); openMsg([...S.clocks.keys()]); });
+
+/* ---------- questions and answers ---------- */
+function qItems(screen){
+  const o=S.inbox[screen]||{};
+  return Object.keys(o).map(k=>Object.assign({id:k},o[k])).filter(x=>x&&typeof x.q==="string").sort((a,b)=>(a.sentAt||0)-(b.sentAt||0));
+}
+function choicesOf(x){ const c=x.choices; return (Array.isArray(c)?c:c?Object.values(c):[]).filter(v=>typeof v==="string"&&v).slice(0,4); }
+function fmtClock(ms){ if(!ms) return ""; const d=new Date(ms); let H=d.getHours(); const m=pad(d.getMinutes()); const ap=H<12?"AM":"PM"; H=H%12||12; return H+":"+m+" "+ap; }
+function onInbox(data){
+  const prevQ=S.seenQ, prevR=S.seenR, q=new Set(), r={};
+  Object.keys(data).forEach(s=>Object.keys(data[s]||{}).forEach(id=>{ q.add(s+"/"+id); const rep=data[s][id]&&data[s][id].reply; if(rep&&rep.at) r[s+"/"+id]=rep.at; }));
+  S.inbox=data; S.seenQ=q; S.seenR=r;
+  if(prevQ && S.view==="display"){
+    const mine=data[S.displayId]||{};
+    if(Object.keys(mine).some(id=>!prevQ.has(S.displayId+"/"+id) && mine[id] && mine[id].open && mine[id].chime!==false)) chime();
+  }
+  if(prevR && S.view==="control"){
+    Object.keys(r).forEach(k=>{ if(prevR[k]!==r[k]){ const [s,id]=k.split("/"), c=S.clocks.get(s), it=data[s][id];
+      toast((c?c.name:s)+" answered: “"+String(it.reply.text).slice(0,60)+"”"); S.fresh=S.fresh||{}; S.fresh[k]=Date.now(); } });
+  }
+  renderAll();
+}
+let actx=null;
+function unlockAudio(){ try{ if(!actx){ const A=window.AudioContext||window.webkitAudioContext; if(A) actx=new A(); } if(actx&&actx.state==="suspended") actx.resume(); }catch(e){} }
+["click","touchstart","keydown"].forEach(ev=>document.addEventListener(ev,unlockAudio,{passive:true}));
+function chime(){
+  try{ unlockAudio(); if(!actx) return; const t=actx.currentTime;
+    [[880,0],[1175,.22]].forEach(([f,dt])=>{ const o=actx.createOscillator(), g=actx.createGain(); o.type="sine"; o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t+dt); g.gain.exponentialRampToValueAtTime(0.35,t+dt+.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dt+.5);
+      o.connect(g).connect(actx.destination); o.start(t+dt); o.stop(t+dt+.55); });
+  }catch(e){}
+}
+/* room screen */
+let askShown="";
+function renderAsk(){
+  const items=qItems(S.displayId).filter(x=>x.open);
+  const pending=items.filter(x=>!(x.reply&&x.reply.text));
+  let cur = S.reanswer && items.find(x=>x.id===S.reanswer);
+  if(!cur){ S.reanswer=null; cur=pending[0]; }
+  const box=$("d-ask"), pill=$("d-answered");
+  if(cur){
+    box.hidden=false; pill.hidden=true;
+    const sig=cur.id+"|"+cur.q+"|"+JSON.stringify(cur.choices||null)+"|"+cur.typed+"|"+(cur.reply?cur.reply.text:"");
+    $("ask-n").textContent = pending.length>1 ? pending.length+" waiting" : "";
+    if(askShown!==sig){
+      const sameQ = askShown.split("|")[0]===cur.id; askShown=sig;
+      $("ask-q").textContent=cur.q;
+      let ch=choicesOf(cur); const typed=!!cur.typed;
+      if(!ch.length && !typed) ch=["Got it"];
+      const mine=cur.reply&&cur.reply.text;
+      $("ask-btns").innerHTML=ch.map((c,i)=>'<button type="button" class="'+(i>0?'alt':'')+'" data-ans="'+esc(c)+'" aria-pressed="'+(mine===c)+'">'+esc(c)+'</button>').join("");
+      $("ask-btns").hidden=!ch.length;
+      $("ask-type").hidden=!typed;
+      if(!sameQ){ $("ask-input").value = (typed && mine && !ch.includes(mine)) ? mine : ""; $("ask-status").textContent=""; $("ask-status").className="ask-status"; }
+    }
+  } else {
+    box.hidden=true; askShown="";
+    const answered=items.filter(x=>x.reply&&x.reply.text).pop();
+    pill.hidden=!answered;
+    if(answered){ $("ans-text").textContent="Answered: “"+answered.reply.text+"”"; pill.dataset.q=answered.id; }
+  }
+}
+function sendAnswer(text){
+  text=String(text||"").trim().slice(0,300); const qid=askShown.split("|")[0];
+  if(!text||!qid) return;
+  const st=$("ask-status"); st.className="ask-status"; st.textContent="Sending…";
+  const path="inbox/"+S.displayId+"/"+qid;
+  const it=(S.inbox[S.displayId]||{})[qid]; const reply={text, at:B.now()};
+  B.setPath(path+"/reply", reply).then(()=>{
+    if(it){ it.reply=reply; } S.reanswer=null; st.textContent=""; renderAsk();
+  }).catch(()=>{ st.className="ask-status err"; st.textContent="Couldn’t send. The question may have been closed, or the connection dropped. Tell your instructor."; });
+}
+$("ask-btns").addEventListener("click", e=>{ const b=e.target.closest("[data-ans]"); if(b) sendAnswer(b.dataset.ans); });
+$("ask-send").addEventListener("click", ()=>sendAnswer($("ask-input").value));
+$("ask-input").addEventListener("keydown", e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendAnswer($("ask-input").value); } });
+$("ans-change").addEventListener("click", ()=>{ S.reanswer=$("d-answered").dataset.q; askShown=""; renderAsk(); });
+
+/* control panel */
+function openAsk(ids){
+  S.askIds=ids.filter(id=>S.clocks.has(id)); if(!S.askIds.length) return;
+  const all=S.askIds.length===S.clocks.size&&S.clocks.size>1;
+  $("a-title").textContent = S.askIds.length===1 ? "Ask "+S.clocks.get(S.askIds[0]).name : all ? "Ask all screens" : "Ask "+S.askIds.length+" screens";
+  $("a-text").value=""; askKindUI(); $("dlg-ask").showModal(); $("a-text").focus();
+}
+function askKind(){ return (document.querySelector('input[name=akind]:checked')||{}).value||"buttons"; }
+function askKindUI(){ const k=askKind(); $("a-choices-wrap").hidden = !(k==="buttons"||k==="both"); }
+document.querySelectorAll('input[name=akind]').forEach(r=>r.addEventListener("change",askKindUI));
+$("a-chips").addEventListener("click", e=>{ const b=e.target.closest("button"); if(b){ $("a-choices").value=b.textContent; } });
+$("f-ask").addEventListener("submit", e=>{
+  if(!e.submitter||e.submitter.value!=="ok") return;
+  if(!S.user){ toast("Sign in as staff to send questions."); return; }
+  const q=$("a-text").value.trim().slice(0,200); if(!q){ e.preventDefault(); toast("Type a message or question."); return; }
+  const k=askKind();
+  const choices = (k==="buttons"||k==="both") ? [...new Set($("a-choices").value.split(",").map(s=>s.trim().slice(0,30)).filter(Boolean))].slice(0,4) : [];
+  if((k==="buttons")&&!choices.length){ e.preventDefault(); toast("Add at least one answer button."); return; }
+  const qid=B.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const item={q, choices:choices.length?choices:null, typed:(k==="text"||k==="both"), chime:$("a-chime").checked, open:true, sentAt:B.now(), group:S.askIds.length};
+  S.askIds.forEach(id=>{ B.setPath("inbox/"+id+"/"+qid, item).catch(failed); });
+  toast(S.askIds.length===1?"Sent to "+S.clocks.get(S.askIds[0]).name+".":"Sent to "+S.askIds.length+" screens.");
+});
+function groupedQuestions(){
+  const g=new Map();
+  Object.keys(S.inbox).forEach(s=>Object.keys(S.inbox[s]||{}).forEach(id=>{ const it=S.inbox[s][id]; if(!it||typeof it.q!=="string") return;
+    if(!g.has(id)) g.set(id,{id,q:it.q,sentAt:it.sentAt||0,open:false,rooms:[]});
+    const x=g.get(id); x.open = x.open || !!it.open; x.rooms.push({s, reply:it.reply}); }));
+  return [...g.values()].sort((a,b)=>b.sentAt-a.sentAt);
+}
+function renderInbox(){
+  const list=groupedQuestions(), box=$("inbox");
+  box.hidden=!list.length; if(!list.length) return;
+  const open=list.filter(x=>x.open).length;
+  $("ib-count").textContent = open+" open · "+(list.length-open)+" closed";
+  $("ib-clear").hidden = list.length===open;
+  const nm=s=>{ const c=S.clocks.get(s); return c?c.name:s; };
+  $("ib-list").innerHTML=list.map(x=>{
+    const answered=x.rooms.filter(r=>r.reply&&r.reply.text).length;
+    const rows=x.rooms.sort((a,b)=>nm(a.s).localeCompare(nm(b.s),undefined,{numeric:true})).map(r=>{
+      const k=r.s+"/"+x.id, fresh=S.fresh&&S.fresh[k]&&Date.now()-S.fresh[k]<120000;
+      return '<b>'+esc(nm(r.s))+'</b>'+(r.reply&&r.reply.text?'<span class="'+(fresh?'fresh':'')+'">'+esc(r.reply.text)+'</span><span class="t">'+fmtClock(r.reply.at)+'</span>':'<span class="wait">'+(x.open?'Waiting…':'No answer')+'</span><span></span>');
+    }).join("");
+    return '<div class="ib-card" data-q="'+esc(x.id)+'"><div class="ib-q">'+esc(x.q)+'</div>'+
+      '<div class="ib-meta">Sent '+fmtClock(x.sentAt)+' · '+answered+' of '+x.rooms.length+' answered · '+(x.open?'Open':'Closed')+'</div>'+
+      '<div class="ib-ans">'+rows+'</div>'+
+      '<div class="ib-acts">'+(x.open?'<button class="btn small" data-ib="close">Close question</button>':'<button class="btn small" data-ib="reopen">Reopen</button>')+
+      '<button class="btn small danger" data-ib="delete">Delete</button></div></div>';
+  }).join("");
+}
+function qRooms(qid){ return Object.keys(S.inbox).filter(s=>S.inbox[s]&&S.inbox[s][qid]); }
+$("ib-list").addEventListener("click", e=>{
+  const b=e.target.closest("[data-ib]"); if(!b) return; const qid=b.closest(".ib-card").dataset.q, a=b.dataset.ib;
+  if(!S.user){ toast("Sign in as staff first."); return; }
+  if(a==="delete" && !confirm("Delete this question and its answers?")) return;
+  qRooms(qid).forEach(s=>{ const p="inbox/"+s+"/"+qid;
+    (a==="delete" ? B.setPath(p,null) : B.updatePath(p,{open:a==="reopen"})).catch(failed); });
+});
+$("ib-clear").addEventListener("click", ()=>{
+  if(!confirm("Delete all closed questions and their answers?")) return;
+  groupedQuestions().filter(x=>!x.open).forEach(x=>qRooms(x.id).forEach(s=>B.setPath("inbox/"+s+"/"+x.id,null).catch(failed)));
+});
+
+/* ---------- colors ---------- */
+const PRESETS={
+  monitor:{label:"Monitor",bg:"#061418",clock:"#8BEBD9",text:"#4F8C86",bar:"#0C2A2F"},
+  wall:{label:"Wall clock",bg:"#FBFCFC",clock:"#0F2A33",text:"#5E7680",bar:"#E4EDEF"},
+  contrast:{label:"High contrast",bg:"#000000",clock:"#FFE45C",text:"#E8E8E8",bar:"#1C1C1C"},
+  scrubs:{label:"Scrubs blue",bg:"#0B2545",clock:"#FFFFFF",text:"#A9C7E8",bar:"#13315C",custom:true},
+  ember:{label:"Warm white",bg:"#1B1410",clock:"#FFD9A8",text:"#C9A27E",bar:"#2A1F18",custom:true},
+  auto:{label:"Match device",bg:null}
+};
+const HEX=/^#[0-9a-fA-F]{6}$/;
+function lookColors(c){
+  const t=c&&c.theme||"monitor";
+  if(t==="custom" && c.colors){ const k=c.colors, base=PRESETS.monitor;
+    return {bg:HEX.test(k.bg)?k.bg:base.bg, clock:HEX.test(k.clock)?k.clock:base.clock, text:HEX.test(k.text)?k.text:base.text, bar:HEX.test(k.bar)?k.bar:base.bar}; }
+  return PRESETS[t]&&PRESETS[t].bg ? PRESETS[t] : null;
+}
+function applyLook(d, c){
+  const props=["--dbg","--dink","--dmuted","--dtext","--dtk","--dline"];
+  props.forEach(p=>d.style.removeProperty(p));
+  const t=c&&c.theme||"monitor";
+  if(t==="custom"){
+    const k=lookColors(c); d.dataset.dtheme="custom";
+    d.style.setProperty("--dbg",k.bg); d.style.setProperty("--dink",k.clock);
+    d.style.setProperty("--dmuted",k.text); d.style.setProperty("--dtext",k.text);
+    d.style.setProperty("--dtk",k.bar); d.style.setProperty("--dline",hexA(k.text,.35));
+  } else d.dataset.dtheme = PRESETS[t] ? t : "monitor";
+}
+function hexA(h,a){ const n=parseInt(h.slice(1),16); return "rgba("+(n>>16)+","+(n>>8&255)+","+(n&255)+","+a+")"; }
+function lum(h){ const n=parseInt(h.slice(1),16); return [n>>16,n>>8&255,n&255].map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0); }
+function contrast(a,b){ const x=lum(a),y=lum(b); return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); }
+const LK={ids:[],theme:"monitor"};
+function openLook(ids){
+  LK.ids=ids.filter(id=>S.clocks.has(id)); if(!LK.ids.length) return;
+  const c=S.clocks.get(LK.ids[0]), all=LK.ids.length===S.clocks.size&&S.clocks.size>1;
+  $("lk-title").textContent = LK.ids.length===1 ? "Colors: "+c.name : all ? "Colors: all screens" : "Colors: "+LK.ids.length+" screens";
+  $("lk-pname").textContent = (LK.ids.length===1?c.name:"Room 108")+" · Scenario time";
+  LK.theme=c.theme||"monitor";
+  setPickers(lookColors(c)||PRESETS.monitor);
+  renderPresets(); previewLook(); $("dlg-look").showModal();
+}
+function setPickers(k){ ["bg","clock","text","bar"].forEach(f=>{ $("lk-"+f).value=k[f].toLowerCase(); }); }
+function pickerColors(){ const o={}; ["bg","clock","text","bar"].forEach(f=>o[f]=$("lk-"+f).value.toUpperCase()); return o; }
+function renderPresets(){
+  $("lk-presets").innerHTML=Object.keys(PRESETS).map(k=>{ const p=PRESETS[k];
+    const sw=p.bg?'<i><b style="background:'+p.bg+'"></b><b style="background:'+p.clock+'"></b><b style="background:'+p.text+'"></b></i>':'<i><b style="background:linear-gradient(135deg,#fff 50%,#0F1C21 50%)"></b></i>';
+    const on = (LK.theme===k) || (LK.theme==="custom"&&p.custom&&JSON.stringify(pickerColors())===JSON.stringify({bg:p.bg,clock:p.clock,text:p.text,bar:p.bar}));
+    return '<button type="button" class="preset" data-p="'+k+'" aria-pressed="'+on+'">'+sw+esc(p.label)+'</button>'; }).join("")+
+    '<button type="button" class="preset" data-p="custom" aria-pressed="'+(LK.theme==="custom")+'"><i><b style="background:conic-gradient(#e66,#ec6,#6c6,#6ce,#66e,#e6c,#e66)"></b></i>Custom</button>';
+}
+function previewLook(){
+  const k = LK.theme==="auto" ? {bg:getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()||"#EEF3F4",clock:getComputedStyle(document.documentElement).getPropertyValue("--ink").trim()||"#15303A",text:"#58717B",bar:"#D3DFE2"} : pickerColors();
+  const pr=$("lk-prev"); pr.style.background=k.bg; $("lk-ptime").style.color=k.clock; $("lk-pname").style.color=k.text;
+  $("lk-pbar").style.background=k.bar; $("lk-pbar").style.color=k.text;
+  ["bg","clock","text","bar"].forEach(f=>$("lk-"+f+"-v").textContent=$("lk-"+f).value.toUpperCase());
+  const w=$("lk-warn"), notes=[];
+  if(LK.theme!=="auto" && HEX.test(k.bg)){
+    if(contrast(k.clock,k.bg)<4.5) notes.push("clock numbers");
+    if(contrast(k.text,k.bg)<3) notes.push("labels");
+    if(contrast(k.text,k.bar)<3) notes.push("message bar text");
+  }
+  w.hidden=!notes.length; w.textContent = notes.length ? "Low contrast: the "+notes.join(", ")+" may be hard to read from across the room." : "";
+}
+$("lk-presets").addEventListener("click", e=>{
+  const b=e.target.closest("[data-p]"); if(!b) return; const k=b.dataset.p, p=PRESETS[k];
+  if(k==="custom"){ LK.theme="custom"; }
+  else if(p.custom){ LK.theme="custom"; setPickers(p); }
+  else { LK.theme=k; if(p.bg) setPickers(p); }
+  renderPresets(); previewLook();
+});
+["bg","clock","text","bar"].forEach(f=>$("lk-"+f).addEventListener("input", ()=>{ LK.theme="custom"; renderPresets(); previewLook(); }));
+$("f-look").addEventListener("submit", e=>{
+  if(!e.submitter||e.submitter.value!=="ok") return;
+  if(!S.user){ toast("Sign in as staff to change colors."); return; }
+  const now=B.now(), theme=LK.theme, colors = theme==="custom" ? pickerColors() : null;
+  LK.ids.forEach(id=>{ const c=S.clocks.get(id); if(!c) return;
+    S.clocks.set(id, Object.assign({},c,{theme,colors,updatedAt:now}));
+    chains[id]=(chains[id]||Promise.resolve()).then(()=>B.update(id,{theme,colors,updatedAt:now})).catch(failed);
+  });
+  renderAll(); toast(LK.ids.length===1?"Colors updated.":"Colors updated on "+LK.ids.length+" screens.");
+});
+
+/* ---------- login ---------- */
+$("f-login").addEventListener("submit", e=>{
+  e.preventDefault(); $("l-err").textContent="";
+  B.signIn($("l-email").value.trim(), $("l-pass").value).then(()=>{ $("l-pass").value=""; if(location.hash) location.hash="control"; })
+   .catch(()=>{ $("l-err").textContent="That email and password didn’t match a staff account. Check them and try again."; });
+});
+$("btn-out").addEventListener("click", ()=>B.signOut());
+
+/* ---------- events ---------- */
+$("btn-add").addEventListener("click", openAdd);
+$("list").addEventListener("click", e=>{
+  if(e.target.closest("[data-empty-add]")) return openAdd();
+  const b=e.target.closest("[data-a]"); if(!b) return;
+  const id=b.closest(".row").dataset.id;
+  if(b.dataset.a==="edit") return openEdit([id]);
+  if(b.dataset.a==="msg") return openMsg([id]);
+  if(b.dataset.a==="look") return openLook([id]);
+  if(b.dataset.a==="ask") return openAsk([id]);
+  doAction([id], b.dataset.a);
+});
+$("list").addEventListener("change", e=>{
+  if(!e.target.matches("[data-sel]")) return;
+  const id=e.target.closest(".row").dataset.id; e.target.checked?S.selected.add(id):S.selected.delete(id); renderControl();
+});
+$("sel-all").addEventListener("change", e=>{ S.selected=e.target.checked?new Set(S.clocks.keys()):new Set(); renderControl(); });
+document.querySelectorAll("[data-g]").forEach(b=>b.addEventListener("click", ()=>{
+  const ids=[...S.selected].filter(id=>S.clocks.has(id)); if(!ids.length) return;
+  if(b.dataset.g==="edit") return openEdit(ids);
+  if(b.dataset.g==="msg") return openMsg(ids);
+  if(b.dataset.g==="look") return openLook(ids);
+  if(b.dataset.g==="ask") return openAsk(ids); doAction(ids,b.dataset.g);
+}));
+$("d-fs").addEventListener("click", ()=>{
+  const el=document.documentElement, p=el.requestFullscreen?el.requestFullscreen():null;
+  const tip=()=>toast("Use the browser’s full screen: F11 on Windows, Ctrl+Cmd+F on Mac.");
+  if(!p) tip(); else p.catch(tip);
+});
+let idleT;
+function poke(){ const d=$("v-display"); d.classList.remove("idle"); clearTimeout(idleT); idleT=setTimeout(()=>d.classList.add("idle"),3500); }
+["mousemove","touchstart","keydown"].forEach(ev=>document.addEventListener(ev,()=>{ if(S.view==="display") poke(); },{passive:true}));
+let lock=null;
+async function wake(){ poke(); try{ if("wakeLock" in navigator&&!lock&&document.visibilityState==="visible"){ lock=await navigator.wakeLock.request("screen"); lock.addEventListener("release",()=>lock=null); } }catch(e){ lock=null; } }
+function unwake(){ if(lock){ lock.release().catch(()=>{}); lock=null; } }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&S.view==="display") wake(); });
+
+window.addEventListener("hashchange", route);
+B.start(data=>{
+  const m=new Map();
+  Object.keys(data).forEach(id=>{ const v=data[id]; if(v&&typeof v==="object"){ const cur=S.clocks.get(id); m.set(id,(cur&&(cur.updatedAt||0)>(v.updatedAt||0))?cur:v); } });
+  S.clocks=m; if(S.status==="wait") S.status="live";
+  [...S.selected].forEach(id=>{ if(!m.has(id)) S.selected.delete(id); });
+  renderAll();
+}, st=>{ S.status=st; renderAll(); });
+B.on("inbox", onInbox);
+route();
+setInterval(tick,100);
+})();
+</script>
+</body>
+</html>
