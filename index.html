@@ -248,6 +248,7 @@ dialog h2{margin:0;font-size:1.25rem}
       <button class="btn small" data-g="edit">Set time…</button>
       <button class="btn small" data-g="msg">Messages…</button>
       <button class="btn small" data-g="look">Colors…</button>
+      <button class="btn small" data-g="end">End time…</button>
       <button class="btn small" data-g="ask">Ask…</button>
     </div>
     <div class="list" id="list"></div>
@@ -320,6 +321,48 @@ dialog h2{margin:0;font-size:1.25rem}
     <div class="dlg-acts">
       <button class="btn" value="cancel" formnovalidate>Cancel</button>
       <button class="btn primary" id="add-go" value="ok">Add screens</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- END TIME -->
+<dialog id="dlg-end">
+  <form method="dialog" id="f-end">
+    <h2 id="n-title">End time</h2>
+    <p class="hint" style="margin:-6px 0 0;color:var(--muted)">Add or change the end at any time. The clock keeps running and is never reset.</p>
+    <div class="field"><span>Scenario ends</span>
+      <div class="seg" role="radiogroup">
+        <label><input type="radio" name="nmode" value="none">No end</label>
+        <label id="n-at-opt"><input type="radio" name="nmode" value="at">At a time</label>
+        <label><input type="radio" name="nmode" value="after" checked>After a length</label>
+      </div>
+      <div id="n-at-wrap"><input type="time" id="n-at" step="1" value="07:30:00" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px" aria-label="End at scenario time"></div>
+      <div class="dur" id="n-len-wrap">
+        <input type="number" id="n-h" min="0" max="23" value="0" aria-label="Hours" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px"> h
+        <input type="number" id="n-m" min="0" max="59" value="30" aria-label="Minutes" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px"> min
+        <input type="number" id="n-s" min="0" max="59" value="0" aria-label="Seconds" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-height:42px"> sec
+      </div>
+      <span class="hint" id="n-hint"></span>
+      <div class="chips" id="n-quick" style="margin-top:4px">
+        <button type="button" data-add="60000">+1 min</button><button type="button" data-add="300000">+5 min</button>
+        <button type="button" data-add="600000">+10 min</button><button type="button" data-add="-60000">−1 min</button>
+      </div>
+    </div>
+    <div class="field"><span>Warning before the end</span>
+      <select id="n-warn">
+        <option value="0">No warning</option>
+        <option value="1">1 minute before (numbers turn amber)</option>
+        <option value="2">2 minutes before</option>
+        <option value="5">5 minutes before</option>
+        <option value="10">10 minutes before</option>
+      </select>
+    </div>
+    <label style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" id="n-stop" checked> Freeze the clock at the end</label>
+    <p class="hint" id="n-note" style="margin:0;color:var(--muted)"></p>
+    <div class="dlg-acts">
+      <button class="btn danger left" type="button" id="n-now">End now</button>
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" value="ok">Save end time</button>
     </div>
   </form>
 </dialog>
@@ -683,6 +726,7 @@ function renderControl(){
         '<button class="btn small" data-a="minus" aria-label="Minus one minute">−1 min</button>'+
         '<button class="btn small" data-a="plus" aria-label="Plus one minute">+1 min</button>'+
         '<span class="gap"></span>'+
+        '<button class="btn small" data-a="end">End time</button>'+
         '<button class="btn small" data-a="ask">Ask</button>'+
         '<button class="btn small" data-a="look">Colors</button>'+
         '<button class="btn small" data-a="msg">Messages'+(tickerOf(c).length?' ('+tickerOf(c).length+')':'')+'</button>'+
@@ -779,7 +823,7 @@ function openEdit(ids){
   S.editIds=ids; const multi=ids.length>1, c=S.clocks.get(ids[0]); if(!c) return;
   $("e-title").textContent=multi?"Set time on "+ids.length+" screens":"Edit "+c.name;
   $("e-name-wrap").hidden=multi; $("e-link-wrap").hidden=multi; $("e-del").hidden=multi;
-  $("e-reset-note").textContent=multi?"All selected screens get these settings and go back to Ready, so you can start them together.":"Changing the clock type or time puts the clock back to Ready.";
+  $("e-reset-note").textContent=multi?"Screens whose clock type or start time changes go back to Ready, so you can start them together. Changing only the end, message or display options keeps clocks running.":"Changing the clock type or start time puts the clock back to Ready. Changing only the end keeps it running.";
   $("e-name").value=c.name||"";
   document.querySelectorAll('input[name=mode]').forEach(r=>r.checked=r.value===(c.mode||"tod"));
   const t=Math.floor((c.mode==="tod"?c.setMs:7*3600000)/1000);
@@ -815,7 +859,7 @@ $("f-edit").addEventListener("submit", e=>{
     const n=Object.assign({},c,{mode,setMs,message:$("e-msg").value.trim().slice(0,90),h24:$("e-h24").checked,showSec:$("e-sec").checked,overtime:$("e-over").checked,
       endMode, endMs, warnMin:+$("e-warn").value||0, endStop:$("e-stop").checked});
     if(!multi){ const nm=$("e-name").value.trim(); if(nm) n.name=nm.slice(0,40); }
-    if(multi||mode!==c.mode||setMs!==c.setMs){ n.running=false; n.elapsedMs=0; n.startedAt=now; n.status="ready"; }
+    if(mode!==(c.mode||"tod")||setMs!==c.setMs){ n.running=false; n.elapsedMs=0; n.startedAt=now; n.status="ready"; }
     writeClock(id,n);
   });
 });
@@ -875,6 +919,77 @@ $("m-list").addEventListener("click", e=>{
 });
 $("m-clear").addEventListener("click", ()=>{ if(confirm("Remove all scrolling messages from these screens?")) setTicker(S.msgIds, ()=>[]); });
 $("btn-msg-all").addEventListener("click", ()=>{ if(!S.clocks.size) return toast("Add screens first."); openMsg([...S.clocks.keys()]); });
+
+/* ---------- end time (never resets the clock) ---------- */
+function msToTime(ms){ const t=Math.floor((((ms%DAY)+DAY)%DAY)/1000); return pad(Math.floor(t/3600))+":"+pad(Math.floor(t%3600/60))+":"+pad(t%60); }
+function timeToMs(v){ const p=(v||"").split(":").map(Number); return ((p[0]||0)*3600+(p[1]||0)*60+(p[2]||0))*1000; }
+function setLen(ms){ const u=Math.max(0,Math.floor(ms/1000)); $("n-h").value=Math.floor(u/3600); $("n-m").value=Math.floor(u%3600/60); $("n-s").value=u%60; }
+function getLen(){ return (Math.max(0,+$("n-h").value||0)*3600+Math.max(0,+$("n-m").value||0)*60+Math.max(0,+$("n-s").value||0))*1000; }
+function nMode(){ return (document.querySelector('input[name=nmode]:checked')||{}).value||"after"; }
+function endUI(){
+  const ids=S.endIds||[], cs=ids.map(id=>S.clocks.get(id)).filter(Boolean);
+  const anyTod=cs.some(c=>(c.mode||"tod")==="tod"), allDown=cs.length&&cs.every(c=>c.mode==="down");
+  $("n-at-opt").hidden=!anyTod;
+  if(!anyTod && nMode()==="at") document.querySelector('input[name=nmode][value=after]').checked=true;
+  const m=nMode();
+  $("n-at-wrap").hidden=m!=="at"; $("n-len-wrap").hidden=m!=="after"; $("n-quick").hidden=m==="none";
+  $("n-hint").textContent = m==="at" ? "Scenario time shown on the screen when it ends." : m==="after" ? (allDown?"Countdown length. Changing it keeps the time already used.":"How long after Start the scenario ends, counting time already run.") : "";
+  const skip = m==="at" ? cs.filter(c=>(c.mode||"tod")!=="tod").length : m==="none" ? cs.filter(c=>c.mode==="down").length : 0;
+  const one=skip===1;
+  $("n-note").textContent = !skip ? "" : m==="at"
+    ? (one?"1 selected screen isn’t a scenario-time clock and will keep its current end.":skip+" selected screens aren’t scenario-time clocks and will keep their current end.")
+    : (one?"1 selected screen is a countdown, which always ends at zero.":skip+" selected screens are countdowns, which always end at zero.");
+}
+document.querySelectorAll('input[name=nmode]').forEach(r=>r.addEventListener("change",endUI));
+function openEnd(ids){
+  S.endIds=ids.filter(id=>S.clocks.has(id)); if(!S.endIds.length) return;
+  const c=S.clocks.get(S.endIds[0]), multi=S.endIds.length>1, all=multi&&S.endIds.length===S.clocks.size;
+  $("n-title").textContent = !multi ? "End time: "+c.name : all ? "End time: all screens" : "End time: "+S.endIds.length+" screens";
+  const mode=c.mode||"tod";
+  let em = mode==="down" ? "after" : (c.endMode||"none");
+  document.querySelectorAll('input[name=nmode]').forEach(r=>r.checked=r.value===em);
+  $("n-at").value = msToTime(em==="at"&&typeof c.endMs==="number" ? c.endMs : (c.setMs||7*3600000)+30*60000);
+  setLen(mode==="down" ? c.setMs : (em==="after"&&c.endMs>0 ? c.endMs : 30*60000));
+  $("n-warn").value=String(c.warnMin==null?1:c.warnMin); if(!$("n-warn").value) $("n-warn").value="1";
+  $("n-stop").checked = mode==="down" ? !c.overtime : c.endStop!==false;
+  endUI(); $("dlg-end").showModal();
+}
+$("n-quick").addEventListener("click", e=>{
+  const b=e.target.closest("[data-add]"); if(!b) return; const d=+b.dataset.add;
+  if(nMode()==="at") $("n-at").value=msToTime(timeToMs($("n-at").value)+d); else setLen(Math.max(60000,getLen()+d));
+});
+function applyEnd(fn){
+  if(!S.user){ toast("Sign in as staff to change end times."); return 0; }
+  const now=B.now(); let n=0;
+  S.endIds.forEach(id=>{ const c=S.clocks.get(id); if(!c) return; const ch=fn(c,now); if(!ch) return; n++;
+    ch.updatedAt=now; S.clocks.set(id,Object.assign({},c,ch));
+    chains[id]=(chains[id]||Promise.resolve()).then(()=>B.update(id,ch)).catch(failed); });
+  renderAll(); return n;
+}
+$("f-end").addEventListener("submit", e=>{
+  if(!e.submitter||e.submitter.value!=="ok") return;
+  const m=nMode(), warnMin=+$("n-warn").value||0, stop=$("n-stop").checked;
+  let at=null, len=null;
+  if(m==="at") at=timeToMs($("n-at").value);
+  if(m==="after"){ len=getLen(); if(len<=0){ e.preventDefault(); toast("Set a length longer than zero."); return; } }
+  const n=applyEnd(c=>{
+    const mode=c.mode||"tod";
+    if(mode==="down"){ const ch={warnMin, overtime:!stop}; if(m==="after") ch.setMs=len; return ch; }
+    const ch={warnMin, endStop:stop};
+    if(m==="none"){ ch.endMode="none"; ch.endMs=null; }
+    else if(m==="after"){ ch.endMode="after"; ch.endMs=len; }
+    else if(mode==="tod"){ if(at===((c.setMs||0)%DAY)) return null; ch.endMode="at"; ch.endMs=at; }
+    return ch;
+  });
+  if(n) toast(n===1?"End time saved. The clock kept running.":"End time saved on "+n+" screens. Clocks kept running.");
+});
+$("n-now").addEventListener("click", ()=>{
+  if(!confirm("End now? The selected screens will show “Scenario complete” right away.")) return;
+  const stop=$("n-stop").checked;
+  const n=applyEnd((c,now)=>{ const el=Math.max(1000,elapsedOf(c,now));
+    return (c.mode||"tod")==="down" ? {setMs:Math.min(c.setMs||el,el), overtime:!stop} : {endMode:"after", endMs:el, endStop:stop}; });
+  $("dlg-end").close(); if(n) toast(n===1?"Scenario ended.":"Ended on "+n+" screens.");
+});
 
 /* ---------- questions and answers ---------- */
 function qItems(screen){
@@ -1114,6 +1229,7 @@ $("list").addEventListener("click", e=>{
   if(b.dataset.a==="msg") return openMsg([id]);
   if(b.dataset.a==="look") return openLook([id]);
   if(b.dataset.a==="ask") return openAsk([id]);
+  if(b.dataset.a==="end") return openEnd([id]);
   doAction([id], b.dataset.a);
 });
 $("list").addEventListener("change", e=>{
@@ -1126,7 +1242,8 @@ document.querySelectorAll("[data-g]").forEach(b=>b.addEventListener("click", ()=
   if(b.dataset.g==="edit") return openEdit(ids);
   if(b.dataset.g==="msg") return openMsg(ids);
   if(b.dataset.g==="look") return openLook(ids);
-  if(b.dataset.g==="ask") return openAsk(ids); doAction(ids,b.dataset.g);
+  if(b.dataset.g==="ask") return openAsk(ids);
+  if(b.dataset.g==="end") return openEnd(ids); doAction(ids,b.dataset.g);
 }));
 $("d-fs").addEventListener("click", ()=>{
   const el=document.documentElement, p=el.requestFullscreen?el.requestFullscreen():null;
