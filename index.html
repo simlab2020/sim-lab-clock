@@ -108,6 +108,14 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
 #v-display.ended .d-mode{color:var(--dalert);font-weight:700}
 @media (prefers-reduced-motion: reduce){#v-display.ended .d-frame{animation:none;opacity:1}}
 .row .endpill{display:none;background:var(--alert-soft)}
+.d-cues{display:flex;flex-direction:column;align-items:center;gap:.25em;margin-top:.45em;max-width:90vw;text-align:center}
+.d-cues div{font-size:clamp(20px,3.3vw,56px);font-weight:700;line-height:1.2;color:var(--dtext,var(--dink));overflow-wrap:anywhere;animation:cuein .8s ease-out}
+.d-cues div.red{color:var(--dalert)}
+@keyframes cuein{from{opacity:0;transform:translateY(.2em)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.d-cues div{animation:none}}
+.cue-add{display:flex;flex-direction:column;gap:8px;border:1px dashed var(--line);border-radius:10px;padding:10px}
+.cue-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cue-row select{width:auto !important}
 .row.ended .endpill{display:inline-block}
 .d-status{margin-top:.5em;font-size:clamp(18px,3.4vw,52px);font-weight:700;color:var(--dmuted);border:3px solid var(--dline);border-radius:999px;padding:.05em .8em}
 .d-status.stopped{color:var(--dalert);border-color:var(--dalert)}
@@ -295,6 +303,7 @@ dialog h2{margin:0;font-size:1.25rem}
   </div>
   <div class="d-mode" id="d-mode"></div>
   <div class="d-time" id="d-time"></div>
+  <div class="d-cues" id="d-cues" aria-live="polite"></div>
   <div class="d-status" id="d-status" hidden></div>
   <div class="d-off" id="d-off" hidden></div>
   <div class="d-msg" id="d-msg" hidden></div>
@@ -346,6 +355,36 @@ dialog h2{margin:0;font-size:1.25rem}
       <div class="chips" id="n-quick" style="margin-top:4px">
         <button type="button" data-add="60000">+1 min</button><button type="button" data-add="300000">+5 min</button>
         <button type="button" data-add="600000">+10 min</button><button type="button" data-add="-60000">−1 min</button>
+      </div>
+    </div>
+    <div class="field"><span>Messages below the time</span>
+      <span class="hint">Shown under the clock at the time you choose, without covering the screen. Saved with the end time.</span>
+      <div class="mlist" id="c-list"></div>
+      <div class="cue-add">
+        <input type="text" id="c-text" maxlength="80" placeholder="e.g. Scenario complete. Go to debrief in Room 115." style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="Message text">
+        <div class="cue-row">
+          <select id="c-when" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="When to show it">
+            <option value="end">At the end</option>
+            <option value="before">Before the end</option>
+            <option value="at">At scenario time</option>
+            <option value="after">After running for</option>
+          </select>
+          <span id="c-min-wrap"><input type="number" id="c-min" min="1" max="600" value="5" style="width:5.5em;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="Minutes"> min</span>
+          <input type="time" id="c-at" value="07:30" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="Scenario time">
+          <select id="c-dur" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="How long to show it">
+            <option value="0">Stay until reset</option>
+            <option value="60000">Show for 1 min</option>
+            <option value="120000">Show for 2 min</option>
+            <option value="300000">Show for 5 min</option>
+            <option value="600000">Show for 10 min</option>
+          </select>
+        </div>
+        <div class="cue-row">
+          <label style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" id="c-red"> Show in red</label>
+          <span style="flex:1"></span>
+          <button type="button" class="btn small" id="c-add">Add to list</button>
+        </div>
+        <span class="hint" id="c-note"></span>
       </div>
     </div>
     <div class="field"><span>Warning before the end</span>
@@ -623,11 +662,33 @@ function view(c, now){
 }
 function modeName(m){ return m==="down"?"Countdown":m==="up"?"Stopwatch":"Scenario time"; }
 function statusName(s){ return ({ready:"Ready",running:"Running",paused:"Paused",stopped:"Stopped"})[s]||"Ready"; }
+function cuesOf(c){ const t=c&&c.cues; return (Array.isArray(t)?t:t?Object.values(t):[]).filter(x=>x&&typeof x.t==="string"&&x.t).slice(0,8); }
+function cueTrig(c,x){
+  const mode=c.mode||"tod";
+  if(x.when==="after") return x.ms>0?x.ms:null;
+  if(x.when==="at") return mode==="tod"&&typeof x.ms==="number" ? ((((x.ms-(c.setMs||0))%DAY)+DAY)%DAY) : null;
+  const endEl=endElOf(c); if(endEl==null) return null;
+  return x.when==="before" ? Math.max(0,endEl-(x.ms||0)) : endEl;
+}
+function activeCues(c,now){
+  const st=c.status||"ready"; if(st!=="running"&&st!=="paused") return [];
+  const el=elapsedOf(c,now);
+  return cuesOf(c).map(x=>({x,tr:cueTrig(c,x)})).filter(o=>o.tr!=null && el>=o.tr && (!(o.x.dur>0) || el<o.tr+o.x.dur))
+    .sort((a,b)=>a.tr-b.tr).slice(-3).map(o=>o.x);
+}
+function cueWhen(x,c){
+  const d=x.dur>0?" · shows "+Math.round(x.dur/60000)+" min":" · stays until reset";
+  if(x.when==="end") return "At the end"+d;
+  if(x.when==="before") return Math.round((x.ms||0)/60000)+" min before the end"+d;
+  if(x.when==="after") return "After running "+Math.round((x.ms||0)/60000)+" min"+d;
+  return "At "+fmtTod(x.ms||0,c||{})+" scenario time"+d;
+}
 function setDesc(c){
-  if(c.mode==="down") return "Countdown from "+fmtDur(c.setMs||0);
+  if(c.mode==="down"){ const nc=cuesOf(c).length; return "Countdown from "+fmtDur(c.setMs||0)+(nc?" · "+nc+" timed message"+(nc>1?"s":""):""); }
   const end = c.endMode==="after"&&c.endMs>0 ? " · ends after "+fmtDur(c.endMs) : (c.endMode==="at"&&c.mode!=="up"&&typeof c.endMs==="number") ? " · ends at "+fmtTod(c.endMs,c) : "";
-  if(c.mode==="up") return "Stopwatch"+end;
-  return "Scenario time from "+fmtTod(c.setMs||0,c)+end;
+  const nc=cuesOf(c).length, cue = nc ? " · "+nc+" timed message"+(nc>1?"s":"") : "";
+  if(c.mode==="up") return "Stopwatch"+end+cue;
+  return "Scenario time from "+fmtTod(c.setMs||0,c)+end+cue;
 }
 
 /* ---------- actions ---------- */
@@ -750,7 +811,7 @@ function renderDisplay(){
   const c=S.clocks.get(S.displayId), off=$("d-off"), d=$("v-display");
   ["d-mode","d-time"].forEach(x=>$(x).hidden=!c);
   if(!c){
-    $("d-status").hidden=true; $("d-msg").hidden=true; renderTicker(null); applyLook(d, null); d.classList.remove("ended"); $("d-ask").hidden=true; $("d-answered").hidden=true; $("d-name").textContent=""; d.dataset.dtheme="monitor"; off.hidden=false;
+    $("d-status").hidden=true; $("d-msg").hidden=true; renderTicker(null); applyLook(d, null); d.classList.remove("ended"); $("d-cues").innerHTML=""; $("d-cues")._sig=""; $("d-ask").hidden=true; $("d-answered").hidden=true; $("d-name").textContent=""; d.dataset.dtheme="monitor"; off.hidden=false;
     off.textContent = S.status==="wait" ? "Connecting…" : S.status==="none" ? "Can’t reach the clock. Check the network connection." : "This screen isn’t set up. Choose another with “Change screen”.";
     return;
   }
@@ -793,6 +854,8 @@ function tick(){
     el.classList.toggle("long",v.main.length>8); el.classList.toggle("warn",!!v.warn); el.classList.toggle("done",!!v.done);
     $("v-display").classList.toggle("ended",!!v.done);
     if($("d-mode").textContent!==v.label) $("d-mode").textContent=v.label;
+    const cs=activeCues(c,now), cb=$("d-cues"), sig=JSON.stringify(cs);
+    if(cb._sig!==sig){ cb._sig=sig; cb.innerHTML=cs.map(x=>'<div class="'+(x.red?'red':'')+'">'+esc(x.t)+'</div>').join(""); }
   }
 }
 
@@ -941,6 +1004,35 @@ function endUI(){
     : (one?"1 selected screen is a countdown, which always ends at zero.":skip+" selected screens are countdowns, which always end at zero.");
 }
 document.querySelectorAll('input[name=nmode]').forEach(r=>r.addEventListener("change",endUI));
+function cueUI(){
+  const w=$("c-when").value, cs=(S.endIds||[]).map(id=>S.clocks.get(id)).filter(Boolean);
+  const anyTod=cs.some(c=>(c.mode||"tod")==="tod");
+  $("c-when").querySelector('option[value=at]').hidden=!anyTod;
+  if(w==="at"&&!anyTod) $("c-when").value="end";
+  const v=$("c-when").value;
+  $("c-min-wrap").hidden=!(v==="before"||v==="after"); $("c-at").hidden=v!=="at";
+  const noEnd=(v==="end"||v==="before") && nMode()==="none" && !cs.some(c=>c.mode==="down");
+  $("c-note").textContent = noEnd ? "Set an end above, or this message won’t have a time to appear." : "";
+}
+$("c-when").addEventListener("change",cueUI);
+function renderCueDraft(){
+  const c=S.clocks.get((S.endIds||[])[0])||{};
+  $("c-list").innerHTML = S.cueDraft.length ? S.cueDraft.map((x,i)=>'<div class="mitem'+(x.red?' alert':'')+'"><span>'+esc(x.t)+'<br><em>'+esc(cueWhen(x,c))+'</em></span><button type="button" class="btn small" data-ci="'+i+'">Remove</button></div>').join("")
+    : '<p style="margin:0;color:var(--muted)">No timed messages yet.</p>';
+  cueUI();
+}
+$("c-list").addEventListener("click", e=>{ const b=e.target.closest("[data-ci]"); if(!b) return; S.cueDraft.splice(+b.dataset.ci,1); renderCueDraft(); });
+$("c-add").addEventListener("click", ()=>{
+  const t=$("c-text").value.trim().slice(0,80); if(!t){ $("c-text").focus(); return toast("Type the message first."); }
+  if(S.cueDraft.length>=8) return toast("Up to 8 timed messages per screen.");
+  const when=$("c-when").value; let ms=null;
+  if(when==="before"||when==="after"){ ms=Math.round(Math.max(1,+$("c-min").value||0)*60000); }
+  if(when==="at") ms=timeToMs($("c-at").value);
+  S.cueDraft.push({t, when, ms, dur:+$("c-dur").value||0, red:$("c-red").checked});
+  $("c-text").value=""; $("c-red").checked=false; $("c-dur").value="0"; renderCueDraft(); $("c-text").focus();
+});
+$("c-text").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); $("c-add").click(); } });
+document.querySelectorAll('input[name=nmode]').forEach(r=>r.addEventListener("change",cueUI));
 function openEnd(ids){
   S.endIds=ids.filter(id=>S.clocks.has(id)); if(!S.endIds.length) return;
   const c=S.clocks.get(S.endIds[0]), multi=S.endIds.length>1, all=multi&&S.endIds.length===S.clocks.size;
@@ -952,7 +1044,11 @@ function openEnd(ids){
   setLen(mode==="down" ? c.setMs : (em==="after"&&c.endMs>0 ? c.endMs : 30*60000));
   $("n-warn").value=String(c.warnMin==null?1:c.warnMin); if(!$("n-warn").value) $("n-warn").value="1";
   $("n-stop").checked = mode==="down" ? !c.overtime : c.endStop!==false;
-  endUI(); $("dlg-end").showModal();
+  const seen=new Set(); S.cueDraft=[];
+  S.endIds.forEach(id=>cuesOf(S.clocks.get(id)).forEach(x=>{ const k=JSON.stringify([x.t,x.when,x.ms,x.dur,!!x.red]); if(!seen.has(k)){ seen.add(k); S.cueDraft.push(Object.assign({},x)); } }));
+  $("c-text").value=""; $("c-red").checked=false; $("c-when").value="end"; $("c-dur").value="0";
+  $("c-at").value=msToTime(((c.setMs||7*3600000)+30*60000)).slice(0,5);
+  renderCueDraft(); endUI(); $("dlg-end").showModal();
 }
 $("n-quick").addEventListener("click", e=>{
   const b=e.target.closest("[data-add]"); if(!b) return; const d=+b.dataset.add;
@@ -974,14 +1070,16 @@ $("f-end").addEventListener("submit", e=>{
   if(m==="after"){ len=getLen(); if(len<=0){ e.preventDefault(); toast("Set a length longer than zero."); return; } }
   const n=applyEnd(c=>{
     const mode=c.mode||"tod";
-    if(mode==="down"){ const ch={warnMin, overtime:!stop}; if(m==="after") ch.setMs=len; return ch; }
-    const ch={warnMin, endStop:stop};
+    const cues=S.cueDraft.filter(x=>x.when!=="at"||mode==="tod").map(x=>Object.assign({},x));
+    const cueVal=cues.length?cues:null;
+    if(mode==="down"){ const ch={warnMin, overtime:!stop, cues:cueVal}; if(m==="after") ch.setMs=len; return ch; }
+    const ch={warnMin, endStop:stop, cues:cueVal};
     if(m==="none"){ ch.endMode="none"; ch.endMs=null; }
     else if(m==="after"){ ch.endMode="after"; ch.endMs=len; }
-    else if(mode==="tod"){ if(at===((c.setMs||0)%DAY)) return null; ch.endMode="at"; ch.endMs=at; }
+    else if(mode==="tod" && at!==((c.setMs||0)%DAY)){ ch.endMode="at"; ch.endMs=at; }
     return ch;
   });
-  if(n) toast(n===1?"End time saved. The clock kept running.":"End time saved on "+n+" screens. Clocks kept running.");
+  if(n) toast(n===1?"End time and messages saved. The clock kept running.":"Saved on "+n+" screens. Clocks kept running.");
 });
 $("n-now").addEventListener("click", ()=>{
   if(!confirm("End now? The selected screens will show “Scenario complete” right away.")) return;
