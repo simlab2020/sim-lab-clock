@@ -108,6 +108,49 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
 #v-display.ended .d-mode{color:var(--dalert);font-weight:700}
 @media (prefers-reduced-motion: reduce){#v-display.ended .d-frame{animation:none;opacity:1}}
 .row .endpill{display:none;background:var(--alert-soft)}
+.d-main{display:flex;flex-direction:column;align-items:center;min-width:0}
+.d-side{display:flex;flex-direction:column;gap:2.2vh;min-width:0;max-height:78vh}
+#v-display.split{flex-direction:row;gap:4vw;padding-left:5vw;padding-right:5vw}
+#v-display.split .d-main{flex:1 1 56%}
+#v-display.split .d-side{flex:1 1 40%}
+#v-display.split .d-time{font-size:min(9.5vw,25vh)}
+#v-display.split .d-time.long{font-size:min(7.2vw,22vh)}
+#v-display.split .d-mode{font-size:clamp(26px,3.8vw,68px);font-weight:700;color:var(--dalert);text-align:center;line-height:1.1;margin-bottom:.3em}
+#v-display.split .d-cues div{font-size:clamp(18px,2.4vw,42px)}
+.side-qr{align-self:center;background:#FFFFFF;color:#15303A;border-radius:16px;padding:clamp(10px,1.3vw,22px);display:flex;flex-direction:column;align-items:center;gap:.5em;box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.side-qr svg{width:min(26vh,20vw);height:auto;display:block}
+.side-qr .lbl{font-size:clamp(15px,1.6vw,28px);font-weight:700;text-align:center;max-width:22vw}
+.side-qr .url{font-size:clamp(12px,1vw,18px);color:#4A5565;text-align:center;max-width:22vw;overflow-wrap:anywhere}
+.side-info{border:2px solid var(--dline);border-radius:16px;padding:clamp(12px,1.4vw,26px);color:var(--dtext,var(--dink));overflow:hidden}
+.side-info .h{font-size:clamp(18px,2.1vw,36px);font-weight:700;color:var(--dink);margin-bottom:.3em}
+.side-info .t{font-size:clamp(15px,1.7vw,30px);line-height:1.35;white-space:pre-line;overflow-wrap:anywhere}
+.d-call{position:absolute;right:2vw;bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:5;display:flex;align-items:center;gap:.5em;font:inherit;font-weight:700;font-size:clamp(15px,1.6vw,26px);padding:.45em 1em;border-radius:999px;border:2px solid var(--dline);background:var(--dtk,rgba(255,255,255,.08));color:var(--dtext,var(--dink));cursor:pointer;min-height:44px}
+.d-call svg{width:1.1em;height:1.1em}
+.d-call .badge{background:#FF8200;color:#041E42;border-radius:999px;padding:0 .5em;font-size:.85em}
+#v-display.has-call .d-msg{right:calc(2vw + clamp(150px,15vw,260px))}
+.d-chat{position:absolute;right:2vw;top:50%;transform:translateY(-50%);width:min(580px,44vw);max-height:86vh;z-index:7;display:flex}
+.chat-card{color-scheme:light;flex:1;display:flex;flex-direction:column;gap:.6em;background:#FFFFFF;color:#15303A;border-radius:18px;padding:clamp(14px,1.6vw,26px);box-shadow:0 20px 60px rgba(0,0,0,.4);font-family:var(--ui);min-height:0}
+.chat-head{display:flex;justify-content:space-between;align-items:center;gap:1em;font-weight:700;font-size:clamp(17px,1.8vw,30px);color:#0E6E73}
+.chat-head button{font:inherit;font-size:.7em;border:2px solid #0E6E73;color:#0E6E73;background:#fff;border-radius:999px;padding:.2em .9em;cursor:pointer}
+.chat-log{display:flex;flex-direction:column;gap:.45em;overflow:auto;min-height:2em;max-height:34vh;font-size:clamp(15px,1.5vw,26px)}
+.chat-log .m{max-width:85%;padding:.35em .7em;border-radius:12px;background:#EEF3F4;align-self:flex-start;overflow-wrap:anywhere}
+.chat-log .m.me{align-self:flex-end;background:#0E6E73;color:#fff}
+.chat-log .m small{display:block;font-size:.7em;opacity:.75}
+.chat-quick{display:flex;flex-wrap:wrap;gap:.4em}
+.chat-quick button{font:inherit;font-size:clamp(14px,1.3vw,22px);font-weight:700;border:2px solid #0E6E73;color:#0E6E73;background:#fff;border-radius:10px;padding:.3em .8em;cursor:pointer;min-height:44px}
+.chat-type{display:flex;gap:.5em}
+.chat-type textarea{flex:1;font:inherit;font-size:clamp(15px,1.5vw,26px);border:2px solid #9FB6BD;border-radius:12px;padding:.35em .6em;color:#15303A;background:#F6F9FA;resize:none}
+.pg-card{border-top:1px solid var(--line);padding:10px 0;margin-top:8px}
+.pg-card.unread{background:var(--accent-soft);margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}
+.pg-msgs{display:flex;flex-direction:column;gap:3px;margin:6px 0;font-size:.95rem}
+.pg-msgs .room b{color:var(--ink)}
+.pg-msgs .staff{color:var(--muted)}
+.pg-reply{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pg-reply input{flex:1 1 200px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:40px}
+#pages.alerting{border-color:#FF8200;box-shadow:0 0 0 2px #FF8200}
+.snd-list{display:flex;flex-direction:column;gap:6px}
+.snd-list label{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:6px 8px 6px 10px;background:var(--bg)}
+.snd-list label span{flex:1}
 .d-cues{display:flex;flex-direction:column;align-items:center;gap:.25em;margin-top:.45em;max-width:90vw;text-align:center}
 .d-cues div{font-size:clamp(20px,3.3vw,56px);font-weight:700;line-height:1.2;color:var(--dtext,var(--dink));overflow-wrap:anywhere;animation:cuein .8s ease-out}
 .d-cues div.red{color:var(--dalert)}
@@ -241,6 +284,10 @@ dialog h2{margin:0;font-size:1.25rem}
       <button class="btn" id="btn-msg-all">Message all screens</button>
       <button class="btn primary" id="btn-add">Add screens</button>
     </div>
+    <section class="inbox" id="pages" hidden>
+      <div class="inbox-head"><h2>Pages from rooms</h2><span class="count" id="pg-count"></span></div>
+      <div id="pg-list"></div>
+    </section>
     <section class="inbox" id="inbox" hidden>
       <div class="inbox-head"><h2>Questions and answers</h2><span class="count" id="ib-count"></span>
         <button class="btn small" id="ib-clear">Delete closed</button></div>
@@ -258,6 +305,7 @@ dialog h2{margin:0;font-size:1.25rem}
       <button class="btn small" data-g="look">Colors…</button>
       <button class="btn small" data-g="end">End time…</button>
       <button class="btn small" data-g="ask">Ask…</button>
+      <button class="btn small" data-g="snd">Sound…</button>
     </div>
     <div class="list" id="list"></div>
   </div>
@@ -301,12 +349,28 @@ dialog h2{margin:0;font-size:1.25rem}
     <button id="d-fs">Full screen</button>
     <a href="#screens">Change screen</a>
   </div>
-  <div class="d-mode" id="d-mode"></div>
-  <div class="d-time" id="d-time"></div>
-  <div class="d-cues" id="d-cues" aria-live="polite"></div>
-  <div class="d-status" id="d-status" hidden></div>
+  <div class="d-main" id="d-main">
+    <div class="d-mode" id="d-mode"></div>
+    <div class="d-time" id="d-time"></div>
+    <div class="d-cues" id="d-cues" aria-live="polite"></div>
+    <div class="d-status" id="d-status" hidden></div>
+  </div>
+  <aside class="d-side" id="d-side" hidden>
+    <div class="side-qr" id="side-qr" hidden><div id="qr-img"></div><div class="lbl" id="qr-label"></div><div class="url" id="qr-url"></div></div>
+    <div class="side-info" id="side-info" hidden><div class="h" id="info-h"></div><div class="t" id="info-t"></div></div>
+  </aside>
   <div class="d-off" id="d-off" hidden></div>
   <div class="d-msg" id="d-msg" hidden></div>
+  <button type="button" class="d-call" id="d-call" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>Call staff</span><span class="badge" id="call-badge" hidden></span></button>
+  <div class="d-chat" id="d-chat" hidden role="dialog" aria-labelledby="chat-h">
+    <div class="chat-card">
+      <div class="chat-head"><span id="chat-h">Message staff</span><button type="button" id="chat-close">Close</button></div>
+      <div class="chat-log" id="chat-log" aria-live="polite"></div>
+      <div class="chat-quick" id="chat-quick"><button type="button">Need help now</button><button type="button">Equipment problem</button><button type="button">Ready for debrief</button><button type="button">Running behind</button></div>
+      <div class="chat-type"><textarea id="chat-input" rows="2" maxlength="300" placeholder="Type a message" aria-label="Message to staff"></textarea><button type="button" class="ask-send" id="chat-send">Send</button></div>
+      <div class="ask-status" id="chat-status" aria-live="polite"></div>
+    </div>
+  </div>
   <div class="d-answered" id="d-answered" hidden><span id="ans-text"></span><button type="button" id="ans-change">Change</button></div>
   <div class="d-ask" id="d-ask" hidden role="dialog" aria-modal="true" aria-labelledby="ask-q">
     <div class="ask-card">
@@ -330,6 +394,21 @@ dialog h2{margin:0;font-size:1.25rem}
     <div class="dlg-acts">
       <button class="btn" value="cancel" formnovalidate>Cancel</button>
       <button class="btn primary" id="add-go" value="ok">Add screens</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- SOUND -->
+<dialog id="dlg-snd">
+  <form method="dialog" id="f-snd">
+    <h2 id="s-title">Play a sound</h2>
+    <p class="hint" style="margin:-6px 0 0;color:var(--muted)">Plays on the room screen right away. The clock isn’t affected. Use <b>Test</b> to hear it on this device first.</p>
+    <div class="snd-list" id="s-list"></div>
+    <label class="field"><span>How many times</span>
+      <select id="s-n" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"><option value="1">Once</option><option value="2">2 times</option><option value="3">3 times</option></select></label>
+    <div class="dlg-acts">
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" value="ok">Play on screens</button>
     </div>
   </form>
 </dialog>
@@ -380,6 +459,8 @@ dialog h2{margin:0;font-size:1.25rem}
           </select>
         </div>
         <div class="cue-row">
+          <select id="c-snd" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="Sound"></select>
+          <button type="button" class="btn small" id="c-test">Test</button>
           <label style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" id="c-red"> Show in red</label>
           <span style="flex:1"></span>
           <button type="button" class="btn small" id="c-add">Add to list</button>
@@ -397,6 +478,17 @@ dialog h2{margin:0;font-size:1.25rem}
       </select>
     </div>
     <label style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" id="n-stop" checked> Freeze the clock at the end</label>
+    <div class="field"><span>End screen</span>
+      <label style="display:inline-flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="es-on"> Split the screen when it ends: time and messages on the left, survey QR code and instructions on the right</label>
+      <div id="es-wrap" style="display:flex;flex-direction:column;gap:8px">
+        <input type="text" id="es-title" maxlength="40" placeholder="Title, e.g. Simulation over" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="End screen title">
+        <input type="url" id="es-qr" maxlength="400" placeholder="Survey link, e.g. https://forms.office.com/…" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="Survey link for the QR code">
+        <input type="text" id="es-qrl" maxlength="60" placeholder="Under the QR code, e.g. Scan for the survey" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="QR code caption">
+        <input type="text" id="es-ih" maxlength="40" placeholder="Instructions heading, e.g. Next steps" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="Instructions heading">
+        <textarea id="es-it" rows="4" maxlength="500" placeholder="Instructions, one per line, e.g.&#10;Return equipment to the cart&#10;Go to debrief in Room 115" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px" aria-label="Instructions"></textarea>
+        <span class="hint">Leave the link empty for no QR code, or the instructions empty for no instructions box.</span>
+      </div>
+    </div>
     <p class="hint" id="n-note" style="margin:0;color:var(--muted)"></p>
     <div class="dlg-acts">
       <button class="btn danger left" type="button" id="n-now">End now</button>
@@ -533,6 +625,7 @@ dialog h2{margin:0;font-size:1.25rem}
       <label id="e-h24-wrap"><input type="checkbox" id="e-h24"> 24-hour time</label>
       <label id="e-sec-wrap"><input type="checkbox" id="e-sec" checked> Show seconds</label>
       <label id="e-over-wrap"><input type="checkbox" id="e-over"> Keep counting after zero</label>
+      <label><input type="checkbox" id="e-call" checked> Show “Call staff” button</label>
       <label id="e-stop-wrap"><input type="checkbox" id="e-stop" checked> Freeze the clock at the end</label>
     </div>
     <div class="field" id="e-link-wrap"><span>Screen link</span>
@@ -553,6 +646,7 @@ dialog h2{margin:0;font-size:1.25rem}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="config.js"></script>
 <script>(function(){
 "use strict";
@@ -662,7 +756,7 @@ function view(c, now){
 }
 function modeName(m){ return m==="down"?"Countdown":m==="up"?"Stopwatch":"Scenario time"; }
 function statusName(s){ return ({ready:"Ready",running:"Running",paused:"Paused",stopped:"Stopped"})[s]||"Ready"; }
-function cuesOf(c){ const t=c&&c.cues; return (Array.isArray(t)?t:t?Object.values(t):[]).filter(x=>x&&typeof x.t==="string"&&x.t).slice(0,8); }
+function cuesOf(c){ const t=c&&c.cues; return (Array.isArray(t)?t:t?Object.values(t):[]).filter(x=>x&&((typeof x.t==="string"&&x.t)||(x.snd&&SOUNDS[x.snd]))).slice(0,8); }
 function cueTrig(c,x){
   const mode=c.mode||"tod";
   if(x.when==="after") return x.ms>0?x.ms:null;
@@ -673,20 +767,20 @@ function cueTrig(c,x){
 function activeCues(c,now){
   const st=c.status||"ready"; if(st!=="running"&&st!=="paused") return [];
   const el=elapsedOf(c,now);
-  return cuesOf(c).map(x=>({x,tr:cueTrig(c,x)})).filter(o=>o.tr!=null && el>=o.tr && (!(o.x.dur>0) || el<o.tr+o.x.dur))
+  return cuesOf(c).filter(x=>x.t).map(x=>({x,tr:cueTrig(c,x)})).filter(o=>o.tr!=null && el>=o.tr && (!(o.x.dur>0) || el<o.tr+o.x.dur))
     .sort((a,b)=>a.tr-b.tr).slice(-3).map(o=>o.x);
 }
 function cueWhen(x,c){
-  const d=x.dur>0?" · shows "+Math.round(x.dur/60000)+" min":" · stays until reset";
+  const d=(x.t?(x.dur>0?" · shows "+Math.round(x.dur/60000)+" min":" · stays until reset"):"")+(x.snd&&SOUNDS[x.snd]?" · plays "+SOUNDS[x.snd].label+(x.n>1?" ×"+x.n:""):"");
   if(x.when==="end") return "At the end"+d;
   if(x.when==="before") return Math.round((x.ms||0)/60000)+" min before the end"+d;
   if(x.when==="after") return "After running "+Math.round((x.ms||0)/60000)+" min"+d;
   return "At "+fmtTod(x.ms||0,c||{})+" scenario time"+d;
 }
 function setDesc(c){
-  if(c.mode==="down"){ const nc=cuesOf(c).length; return "Countdown from "+fmtDur(c.setMs||0)+(nc?" · "+nc+" timed message"+(nc>1?"s":""):""); }
+  if(c.mode==="down"){ const nc=cuesOf(c).length; return "Countdown from "+fmtDur(c.setMs||0)+(nc?" · "+nc+" timed item"+(nc>1?"s":""):""); }
   const end = c.endMode==="after"&&c.endMs>0 ? " · ends after "+fmtDur(c.endMs) : (c.endMode==="at"&&c.mode!=="up"&&typeof c.endMs==="number") ? " · ends at "+fmtTod(c.endMs,c) : "";
-  const nc=cuesOf(c).length, cue = nc ? " · "+nc+" timed message"+(nc>1?"s":"") : "";
+  const nc=cuesOf(c).length, cue = nc ? " · "+nc+" timed item"+(nc>1?"s":"") : "";
   if(c.mode==="up") return "Stopwatch"+end+cue;
   return "Scenario time from "+fmtTod(c.setMs||0,c)+end+cue;
 }
@@ -722,7 +816,7 @@ function writeClock(id, next){
 }
 function deleteClock(id){
   S.clocks.delete(id); S.selected.delete(id); renderAll();
-  chains[id]=(chains[id]||Promise.resolve()).then(()=>B.remove(id)).then(()=>B.setPath("inbox/"+id,null)).catch(failed);
+  chains[id]=(chains[id]||Promise.resolve()).then(()=>B.remove(id)).then(()=>B.setPath("inbox/"+id,null)).then(()=>B.setPath("chat/"+id,null)).catch(failed);
 }
 
 /* ---------- ids ---------- */
@@ -768,6 +862,7 @@ function renderSync(){
   $("btn-out").hidden = DEMO;
 }
 function renderControl(){
+  renderPages();
   renderInbox();
   const list=$("list"), items=sorted();
   $("group").hidden=items.length<2;
@@ -789,6 +884,7 @@ function renderControl(){
         '<span class="gap"></span>'+
         '<button class="btn small" data-a="end">End time</button>'+
         '<button class="btn small" data-a="ask">Ask</button>'+
+        '<button class="btn small" data-a="snd">Sound</button>'+
         '<button class="btn small" data-a="look">Colors</button>'+
         '<button class="btn small" data-a="msg">Messages'+(tickerOf(c).length?' ('+tickerOf(c).length+')':'')+'</button>'+
         '<button class="btn small" data-a="edit">Edit</button>'+
@@ -811,7 +907,7 @@ function renderDisplay(){
   const c=S.clocks.get(S.displayId), off=$("d-off"), d=$("v-display");
   ["d-mode","d-time"].forEach(x=>$(x).hidden=!c);
   if(!c){
-    $("d-status").hidden=true; $("d-msg").hidden=true; renderTicker(null); applyLook(d, null); d.classList.remove("ended"); $("d-cues").innerHTML=""; $("d-cues")._sig=""; $("d-ask").hidden=true; $("d-answered").hidden=true; $("d-name").textContent=""; d.dataset.dtheme="monitor"; off.hidden=false;
+    $("d-status").hidden=true; $("d-msg").hidden=true; renderTicker(null); applyLook(d, null); d.classList.remove("ended","split"); $("d-side").hidden=true; $("d-call").hidden=true; $("d-chat").hidden=true; $("d-cues").innerHTML=""; $("d-cues")._sig=""; $("d-ask").hidden=true; $("d-answered").hidden=true; $("d-name").textContent=""; d.dataset.dtheme="monitor"; off.hidden=false;
     off.textContent = S.status==="wait" ? "Connecting…" : S.status==="none" ? "Can’t reach the clock. Check the network connection." : "This screen isn’t set up. Choose another with “Change screen”.";
     return;
   }
@@ -822,6 +918,9 @@ function renderDisplay(){
   d.classList.toggle("has-msg",!!c.message);
   renderAsk();
   renderTicker(c);
+  d.classList.toggle("has-call", c.callBtn!==false); $("d-call").hidden = c.callBtn===false;
+  checkPing(c);
+  renderRoomChat();
 }
 function renderTicker(c){
   const list=c?tickerOf(c):[], tk=$("d-ticker"), d=$("v-display");
@@ -853,7 +952,10 @@ function tick(){
     if(el._h!==html){ el.innerHTML=html; el._h=html; }
     el.classList.toggle("long",v.main.length>8); el.classList.toggle("warn",!!v.warn); el.classList.toggle("done",!!v.done);
     $("v-display").classList.toggle("ended",!!v.done);
-    if($("d-mode").textContent!==v.label) $("d-mode").textContent=v.label;
+    const lbl = (v.done && c.endScreen && c.endScreen.on) ? (c.endScreen.title||"Simulation over") : v.label;
+    if($("d-mode").textContent!==lbl) $("d-mode").textContent=lbl;
+    renderEndScreen(c,v);
+    cueSounds(c,now);
     const cs=activeCues(c,now), cb=$("d-cues"), sig=JSON.stringify(cs);
     if(cb._sig!==sig){ cb._sig=sig; cb.innerHTML=cs.map(x=>'<div class="'+(x.red?'red':'')+'">'+esc(x.t)+'</div>').join(""); }
   }
@@ -901,7 +1003,7 @@ function openEdit(ids){
   const el2=Math.floor((em==="after"&&c.endMs>0?c.endMs:30*60000)/1000);
   $("e-eh").value=Math.floor(el2/3600); $("e-em").value=Math.floor(el2%3600/60); $("e-es").value=el2%60;
   $("e-warn").value=String(c.warnMin==null?1:c.warnMin); if(!$("e-warn").value) $("e-warn").value="1";
-  $("e-stop").checked=c.endStop!==false;
+  $("e-stop").checked=c.endStop!==false; $("e-call").checked=c.callBtn!==false;
   $("e-link").value=linkFor(ids[0]); modeUI(); $("dlg-edit").showModal();
 }
 $("f-edit").addEventListener("submit", e=>{
@@ -920,7 +1022,7 @@ $("f-edit").addEventListener("submit", e=>{
   S.editIds.forEach(id=>{
     const c=S.clocks.get(id); if(!c) return;
     const n=Object.assign({},c,{mode,setMs,message:$("e-msg").value.trim().slice(0,90),h24:$("e-h24").checked,showSec:$("e-sec").checked,overtime:$("e-over").checked,
-      endMode, endMs, warnMin:+$("e-warn").value||0, endStop:$("e-stop").checked});
+      endMode, endMs, warnMin:+$("e-warn").value||0, endStop:$("e-stop").checked, callBtn:$("e-call").checked});
     if(!multi){ const nm=$("e-name").value.trim(); if(nm) n.name=nm.slice(0,40); }
     if(mode!==(c.mode||"tod")||setMs!==c.setMs){ n.running=false; n.elapsedMs=0; n.startedAt=now; n.status="ready"; }
     writeClock(id,n);
@@ -1017,19 +1119,20 @@ function cueUI(){
 $("c-when").addEventListener("change",cueUI);
 function renderCueDraft(){
   const c=S.clocks.get((S.endIds||[])[0])||{};
-  $("c-list").innerHTML = S.cueDraft.length ? S.cueDraft.map((x,i)=>'<div class="mitem'+(x.red?' alert':'')+'"><span>'+esc(x.t)+'<br><em>'+esc(cueWhen(x,c))+'</em></span><button type="button" class="btn small" data-ci="'+i+'">Remove</button></div>').join("")
+  $("c-list").innerHTML = S.cueDraft.length ? S.cueDraft.map((x,i)=>'<div class="mitem'+(x.red?' alert':'')+'"><span>'+(x.t?esc(x.t):'<i>Sound only</i>')+'<br><em>'+esc(cueWhen(x,c))+'</em></span><button type="button" class="btn small" data-ci="'+i+'">Remove</button></div>').join("")
     : '<p style="margin:0;color:var(--muted)">No timed messages yet.</p>';
   cueUI();
 }
 $("c-list").addEventListener("click", e=>{ const b=e.target.closest("[data-ci]"); if(!b) return; S.cueDraft.splice(+b.dataset.ci,1); renderCueDraft(); });
 $("c-add").addEventListener("click", ()=>{
-  const t=$("c-text").value.trim().slice(0,80); if(!t){ $("c-text").focus(); return toast("Type the message first."); }
+  const t=$("c-text").value.trim().slice(0,80), snd=$("c-snd").value;
+  if(!t && !snd){ $("c-text").focus(); return toast("Type a message, choose a sound, or both."); }
   if(S.cueDraft.length>=8) return toast("Up to 8 timed messages per screen.");
   const when=$("c-when").value; let ms=null;
   if(when==="before"||when==="after"){ ms=Math.round(Math.max(1,+$("c-min").value||0)*60000); }
   if(when==="at") ms=timeToMs($("c-at").value);
-  S.cueDraft.push({t, when, ms, dur:+$("c-dur").value||0, red:$("c-red").checked});
-  $("c-text").value=""; $("c-red").checked=false; $("c-dur").value="0"; renderCueDraft(); $("c-text").focus();
+  S.cueDraft.push({t, when, ms, dur:+$("c-dur").value||0, red:$("c-red").checked, snd:snd||null});
+  $("c-text").value=""; $("c-red").checked=false; $("c-dur").value="0"; $("c-snd").value=""; renderCueDraft(); $("c-text").focus();
 });
 $("c-text").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); $("c-add").click(); } });
 document.querySelectorAll('input[name=nmode]').forEach(r=>r.addEventListener("change",cueUI));
@@ -1045,8 +1148,9 @@ function openEnd(ids){
   $("n-warn").value=String(c.warnMin==null?1:c.warnMin); if(!$("n-warn").value) $("n-warn").value="1";
   $("n-stop").checked = mode==="down" ? !c.overtime : c.endStop!==false;
   const seen=new Set(); S.cueDraft=[];
-  S.endIds.forEach(id=>cuesOf(S.clocks.get(id)).forEach(x=>{ const k=JSON.stringify([x.t,x.when,x.ms,x.dur,!!x.red]); if(!seen.has(k)){ seen.add(k); S.cueDraft.push(Object.assign({},x)); } }));
-  $("c-text").value=""; $("c-red").checked=false; $("c-when").value="end"; $("c-dur").value="0";
+  S.endIds.forEach(id=>cuesOf(S.clocks.get(id)).forEach(x=>{ const k=JSON.stringify([x.t,x.when,x.ms,x.dur,!!x.red,x.snd||null]); if(!seen.has(k)){ seen.add(k); S.cueDraft.push(Object.assign({},x)); } }));
+  $("c-text").value=""; $("c-red").checked=false; $("c-when").value="end"; $("c-dur").value="0"; $("c-snd").value="";
+  const es=c.endScreen||{}; $("es-on").checked=!!es.on; $("es-title").value=es.title||""; $("es-qr").value=es.qr||""; $("es-qrl").value=es.qrLabel||""; $("es-ih").value=es.infoH||""; $("es-it").value=es.info||""; esUI();
   $("c-at").value=msToTime(((c.setMs||7*3600000)+30*60000)).slice(0,5);
   renderCueDraft(); endUI(); $("dlg-end").showModal();
 }
@@ -1068,12 +1172,16 @@ $("f-end").addEventListener("submit", e=>{
   let at=null, len=null;
   if(m==="at") at=timeToMs($("n-at").value);
   if(m==="after"){ len=getLen(); if(len<=0){ e.preventDefault(); toast("Set a length longer than zero."); return; } }
+  const qr=$("es-qr").value.trim();
+  if(qr && !/^https?:\/\/\S+$/i.test(qr)){ e.preventDefault(); toast("The survey link must start with https://"); return; }
+  const esVal = ($("es-on").checked||qr||$("es-it").value.trim()) ? {on:$("es-on").checked, title:$("es-title").value.trim().slice(0,40), qr, qrLabel:$("es-qrl").value.trim().slice(0,60), infoH:$("es-ih").value.trim().slice(0,40), info:$("es-it").value.trim().slice(0,500)} : null;
   const n=applyEnd(c=>{
     const mode=c.mode||"tod";
     const cues=S.cueDraft.filter(x=>x.when!=="at"||mode==="tod").map(x=>Object.assign({},x));
+    const endScreen=esVal;
     const cueVal=cues.length?cues:null;
-    if(mode==="down"){ const ch={warnMin, overtime:!stop, cues:cueVal}; if(m==="after") ch.setMs=len; return ch; }
-    const ch={warnMin, endStop:stop, cues:cueVal};
+    if(mode==="down"){ const ch={warnMin, overtime:!stop, cues:cueVal, endScreen}; if(m==="after") ch.setMs=len; return ch; }
+    const ch={warnMin, endStop:stop, cues:cueVal, endScreen};
     if(m==="none"){ ch.endMode="none"; ch.endMs=null; }
     else if(m==="after"){ ch.endMode="after"; ch.endMs=len; }
     else if(mode==="tod" && at!==((c.setMs||0)%DAY)){ ch.endMode="at"; ch.endMs=at; }
@@ -1088,6 +1196,170 @@ $("n-now").addEventListener("click", ()=>{
     return (c.mode||"tod")==="down" ? {setMs:Math.min(c.setMs||el,el), overtime:!stop} : {endMode:"after", endMs:el, endStop:stop}; });
   $("dlg-end").close(); if(n) toast(n===1?"Scenario ended.":"Ended on "+n+" screens.");
 });
+
+/* ---------- sounds (made in the browser, no files) ---------- */
+function tone(t,f,dur,type,vol,attack){
+  const o=actx.createOscillator(), g=actx.createGain(); o.type=type||"sine"; o.frequency.value=f;
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||0.3,t+(attack||0.02)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t+dur+0.05);
+}
+const SOUNDS={
+  chime:{label:"Chime",len:0.9,play:t=>{ tone(t,880,0.5,"sine",0.32); tone(t+0.22,1175,0.6,"sine",0.32); }},
+  bell:{label:"Bell",len:2.2,play:t=>{ [[660,0.32],[1822,0.12],[3564,0.05]].forEach(([f,v])=>tone(t,f,2.1,"sine",v,0.005)); }},
+  dingdong:{label:"Ding-dong",len:1.6,play:t=>{ tone(t,784,0.9,"sine",0.32); tone(t+0.55,622,1.0,"sine",0.32); }},
+  beeps:{label:"Three beeps",len:0.9,play:t=>{ [0,0.28,0.56].forEach(d=>tone(t+d,1000,0.16,"triangle",0.28,0.01)); }},
+  rise:{label:"Rising tones",len:1.1,play:t=>{ [523,659,784].forEach((f,i)=>tone(t+i*0.24,f,0.45,"sine",0.3)); }},
+  alarm:{label:"Gentle alarm",len:1.3,play:t=>{ [880,660,880,660].forEach((f,i)=>tone(t+i*0.3,f,0.26,"triangle",0.26,0.01)); }},
+  soft:{label:"Soft pulse",len:1.5,play:t=>{ tone(t,440,1.4,"sine",0.28,0.25); }}
+};
+function playSound(name,times){
+  try{ unlockAudio(); const s=SOUNDS[name]; if(!actx||!s) return; let t=actx.currentTime+0.05;
+    for(let i=0;i<Math.min(3,Math.max(1,times||1));i++){ s.play(t); t+=s.len+0.45; } }catch(e){}
+}
+const SND_OPTS='<option value="">No sound</option>'+Object.keys(SOUNDS).map(k=>'<option value="'+k+'">'+SOUNDS[k].label+'</option>').join("");
+$("c-snd").innerHTML=SND_OPTS;
+$("c-test").addEventListener("click", ()=>{ const s=$("c-snd").value; if(s) playSound(s,1); else toast("Choose a sound first."); });
+$("s-list").innerHTML=Object.keys(SOUNDS).map((k,i)=>'<label><input type="radio" name="snd" value="'+k+'"'+(i===0?' checked':'')+'><span>'+SOUNDS[k].label+'</span><button type="button" class="btn small" data-test="'+k+'">Test</button></label>').join("");
+$("s-list").addEventListener("click", e=>{ const b=e.target.closest("[data-test]"); if(b){ e.preventDefault(); playSound(b.dataset.test,1); } });
+function openSnd(ids){
+  S.sndIds=ids.filter(id=>S.clocks.has(id)); if(!S.sndIds.length) return;
+  const all=S.sndIds.length===S.clocks.size&&S.clocks.size>1;
+  $("s-title").textContent = S.sndIds.length===1 ? "Play a sound: "+S.clocks.get(S.sndIds[0]).name : all ? "Play a sound: all screens" : "Play a sound: "+S.sndIds.length+" screens";
+  $("dlg-snd").showModal();
+}
+$("f-snd").addEventListener("submit", e=>{
+  if(!e.submitter||e.submitter.value!=="ok") return;
+  if(!S.user){ toast("Sign in as staff to play sounds."); return; }
+  const s=(document.querySelector('input[name=snd]:checked')||{}).value||"chime", n=+$("s-n").value||1, now=B.now();
+  const ping={s, n, at:now, k:now.toString(36)+Math.random().toString(36).slice(2,5)};
+  S.sndIds.forEach(id=>{ const c=S.clocks.get(id); if(!c) return; S.clocks.set(id,Object.assign({},c,{ping}));
+    chains[id]=(chains[id]||Promise.resolve()).then(()=>B.update(id,{ping})).catch(failed); });
+  toast(SOUNDS[s].label+" sent to "+(S.sndIds.length===1?S.clocks.get(S.sndIds[0]).name:S.sndIds.length+" screens")+".");
+});
+function checkPing(c){
+  const p=c.ping, key=S.displayId;
+  S.pingSeen=S.pingSeen||{};
+  if(!p||!p.k) { if(!(key in S.pingSeen)) S.pingSeen[key]=""; return; }
+  if(!(key in S.pingSeen)){ S.pingSeen[key]=p.k; return; }
+  if(S.pingSeen[key]!==p.k){ S.pingSeen[key]=p.k; if(B.now()-(p.at||0)<20000) playSound(p.s,p.n); }
+}
+function cueSounds(c,now){
+  const played=S.cuePlayed||(S.cuePlayed={}), st=c.status||"ready", el=elapsedOf(c,now);
+  cuesOf(c).forEach((x,i)=>{ if(!x.snd) return; const tr=cueTrig(c,x); if(tr==null) return;
+    const k=S.displayId+"|"+i+"|"+x.snd+"|"+tr;
+    if((st!=="running"&&st!=="paused") || el<tr){ played[k]="armed"; return; }
+    if(played[k]==="armed"){ played[k]="done"; if(el-tr<3000) playSound(x.snd,x.n||1); } });
+}
+
+/* ---------- split end screen ---------- */
+function qrSvg(url){
+  try{ if(!window.qrcode) return null; const q=window.qrcode(0,"M"); q.addData(url); q.make();
+    const n=q.getModuleCount(), m=2; let d="";
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(q.isDark(r,c)) d+="M"+(c+m)+" "+(r+m)+"h1v1h-1z";
+    return '<svg viewBox="0 0 '+(n+2*m)+' '+(n+2*m)+'" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="100%" height="100%" fill="#fff"/><path d="'+d+'" fill="#000"/></svg>';
+  }catch(e){ return null; }
+}
+function esUI(){ $("es-wrap").style.opacity=$("es-on").checked?"1":".55"; }
+$("es-on").addEventListener("change",esUI);
+function renderEndScreen(c,v){
+  const d=$("v-display"), es=c.endScreen||{}, on=!!(v.done && es.on && (es.qr||es.info));
+  d.classList.toggle("split",on); $("d-side").hidden=!on;
+  if(!on) return;
+  const sig=JSON.stringify(es)+"|"+!!window.qrcode;
+  if($("d-side")._sig===sig) return; $("d-side")._sig=sig;
+  $("side-qr").hidden=!es.qr;
+  if(es.qr){ const svg=qrSvg(es.qr); $("qr-img").innerHTML = svg || ""; $("qr-label").textContent=es.qrLabel||"Scan for the survey"; $("qr-url").textContent = svg ? "" : es.qr; }
+  $("side-info").hidden=!es.info;
+  $("info-h").textContent=es.infoH||"Next steps"; $("info-t").textContent=es.info||"";
+}
+
+/* ---------- pages: rooms call staff, staff reply ---------- */
+function chatOf(screen){ const o=(S.chat||{})[screen]||{}; return Object.keys(o).map(k=>Object.assign({id:k},o[k])).filter(m=>m&&typeof m.text==="string").sort((a,b)=>(a.at||0)-(b.at||0)); }
+function lsGet(k,d){ try{ return JSON.parse(localStorage.getItem(k)||"null")||d; }catch(e){ return d; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+function onChat(data){
+  const first=!S.chatReady; S.chat=data; S.chatReady=true;
+  if(S.view==="display"){
+    const msgs=chatOf(S.displayId), lastStaff=msgs.filter(m=>m.from==="staff").pop();
+    const seen=lsGet("simclock-roomseen",{})[S.displayId]||0;
+    if(first){ if(lastStaff && !(lastStaff.at>seen)) {} }
+    if(lastStaff && lastStaff.at>seen && !first && lastStaff.at!==S.lastStaffAt){ S.lastStaffAt=lastStaff.at; playSound("dingdong",1); openRoomChat(); }
+  }
+  if(S.view==="control"){
+    const seen=lsGet("simclock-staffseen",{}); let fresh=null;
+    Object.keys(data||{}).forEach(s=>{ const last=chatOf(s).filter(m=>m.from==="room").pop();
+      if(last && last.at>(seen[s]||0) && !first && (!S.pgLast||S.pgLast[s]!==last.at)){ fresh={s,last}; }
+      S.pgLast=S.pgLast||{}; if(last) S.pgLast[s]=last.at; });
+    if(fresh){ const c=S.clocks.get(fresh.s); toast("Page from "+(c?c.name:fresh.s)+": “"+fresh.last.text.slice(0,60)+"”"); playSound("alarm",1); }
+  }
+  renderAll();
+}
+function sendChat(screen, from, text){
+  text=String(text||"").trim().slice(0,300); if(!text) return Promise.resolve(false);
+  const now=B.now(), id=now.toString(36)+Math.random().toString(36).slice(2,6);
+  const msg={from,text,at:now};
+  S.chat=S.chat||{}; S.chat[screen]=Object.assign({},S.chat[screen]||{}); S.chat[screen][id]=msg;
+  return B.setPath("chat/"+screen+"/"+id, msg).then(()=>true);
+}
+/* room side */
+function openRoomChat(){ $("d-chat").hidden=false; markRoomSeen(); renderRoomChat(); setTimeout(()=>{ const l=$("chat-log"); l.scrollTop=l.scrollHeight; },30); }
+function markRoomSeen(){ const last=chatOf(S.displayId).filter(m=>m.from==="staff").pop(); if(!last) return; const o=lsGet("simclock-roomseen",{}); o[S.displayId]=last.at; lsSet("simclock-roomseen",o); }
+function renderRoomChat(){
+  if(S.view!=="display") return;
+  const msgs=chatOf(S.displayId), seen=lsGet("simclock-roomseen",{})[S.displayId]||0;
+  const unread=msgs.filter(m=>m.from==="staff"&&m.at>seen).length;
+  $("call-badge").hidden=!unread||!$("d-chat").hidden; $("call-badge").textContent=unread+" new";
+  if($("d-chat").hidden) return;
+  markRoomSeen();
+  const sig=JSON.stringify(msgs.slice(-12));
+  if($("chat-log")._sig===sig) return; $("chat-log")._sig=sig;
+  $("chat-log").innerHTML = msgs.length ? msgs.slice(-12).map(m=>'<div class="m'+(m.from==="room"?' me':'')+'"><small>'+(m.from==="room"?"This room":"Staff")+' · '+fmtClock(m.at)+'</small>'+esc(m.text)+'</div>').join("")
+    : '<div style="color:#58717B">Tap a button or type a message. Staff will see it right away.</div>';
+  const l=$("chat-log"); l.scrollTop=l.scrollHeight;
+}
+function roomSend(text){
+  const st=$("chat-status"); st.className="ask-status"; st.textContent="Sending…";
+  sendChat(S.displayId,"room",text).then(ok=>{ if(ok){ st.textContent="Sent. Staff have been notified."; $("chat-input").value=""; renderRoomChat(); } else st.textContent=""; })
+    .catch(()=>{ st.className="ask-status err"; st.textContent="Couldn’t send. Check the connection, or call the front desk."; });
+}
+$("d-call").addEventListener("click", ()=>{ unlockAudio(); $("chat-status").textContent=""; openRoomChat(); });
+$("chat-close").addEventListener("click", ()=>{ $("d-chat").hidden=true; renderRoomChat(); });
+$("chat-quick").addEventListener("click", e=>{ const b=e.target.closest("button"); if(b) roomSend(b.textContent); });
+$("chat-send").addEventListener("click", ()=>roomSend($("chat-input").value));
+$("chat-input").addEventListener("keydown", e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); roomSend($("chat-input").value); } });
+/* staff side */
+function renderPages(){
+  const box=$("pages"), rooms=Object.keys(S.chat||{}).filter(s=>chatOf(s).length);
+  box.hidden=!rooms.length; if(!rooms.length){ box.classList.remove("alerting"); return; }
+  const seen=lsGet("simclock-staffseen",{}), nm=s=>{ const c=S.clocks.get(s); return c?c.name:s; };
+  const keep={}; let focus=null;
+  $("pg-list").querySelectorAll("input[data-pr]").forEach(i=>{ keep[i.dataset.pr]=i.value; if(document.activeElement===i) focus=i.dataset.pr; });
+  const info=rooms.map(s=>{ const m=chatOf(s), lastRoom=m.filter(x=>x.from==="room").pop(); return {s,m,unread:!!(lastRoom&&lastRoom.at>(seen[s]||0)),last:m[m.length-1].at}; })
+    .sort((a,b)=>(b.unread-a.unread)||(b.last-a.last));
+  const nUn=info.filter(x=>x.unread).length;
+  $("pg-count").textContent = nUn ? nUn+" need a reply" : "All answered";
+  box.classList.toggle("alerting", nUn>0);
+  $("pg-list").innerHTML=info.map(x=>'<div class="pg-card'+(x.unread?' unread':'')+'" data-room="'+esc(x.s)+'"><div class="ib-q">'+esc(nm(x.s))+(x.unread?' <span class="pill" style="background:#FF8200;color:#041E42">New</span>':'')+'</div>'+
+    '<div class="pg-msgs">'+x.m.slice(-5).map(mm=>'<div class="'+(mm.from==="room"?'room':'staff')+'">'+(mm.from==="room"?'<b>Room:</b> ':'You: ')+esc(mm.text)+' <span class="t" style="color:var(--muted);font-size:.8rem">'+fmtClock(mm.at)+'</span></div>').join("")+'</div>'+
+    '<div class="pg-reply"><input type="text" maxlength="300" placeholder="Reply to '+esc(nm(x.s))+'" data-pr="'+esc(x.s)+'" aria-label="Reply to '+esc(nm(x.s))+'">'+
+    '<button class="btn small primary" data-pg="send">Send</button><button class="btn small" data-pq="On my way">On my way</button><button class="btn small" data-pq="Be there in 5 minutes">5 min</button><button class="btn small" data-pq="Got it, thanks">Got it</button>'+
+    (x.unread?'<button class="btn small" data-pg="read">Mark read</button>':'')+'<button class="btn small danger" data-pg="clear">Clear</button></div></div>').join("");
+  $("pg-list").querySelectorAll("input[data-pr]").forEach(i=>{ if(keep[i.dataset.pr]) i.value=keep[i.dataset.pr]; if(focus===i.dataset.pr) i.focus(); });
+}
+function staffSeen(s){ const m=chatOf(s).filter(x=>x.from==="room").pop(); if(!m) return; const o=lsGet("simclock-staffseen",{}); o[s]=m.at; lsSet("simclock-staffseen",o); }
+function staffReply(s,text){
+  if(!S.user){ toast("Sign in as staff to reply."); return; }
+  sendChat(s,"staff",text).then(ok=>{ if(ok){ staffSeen(s); renderAll(); } }).catch(failed);
+}
+$("pg-list").addEventListener("click", e=>{
+  const card=e.target.closest(".pg-card"); if(!card) return; const s=card.dataset.room;
+  const q=e.target.closest("[data-pq]"); if(q) return staffReply(s,q.dataset.pq);
+  const b=e.target.closest("[data-pg]"); if(!b) return;
+  if(b.dataset.pg==="send"){ const i=card.querySelector("input[data-pr]"); const v=i.value; i.value=""; return staffReply(s,v); }
+  if(b.dataset.pg==="read"){ staffSeen(s); return renderAll(); }
+  if(b.dataset.pg==="clear"){ if(!confirm("Clear this conversation from the control panel and the room screen?")) return; B.setPath("chat/"+s,null).catch(failed); }
+});
+$("pg-list").addEventListener("keydown", e=>{ const i=e.target.closest("input[data-pr]"); if(i&&e.key==="Enter"){ e.preventDefault(); const v=i.value; i.value=""; staffReply(i.dataset.pr,v); } });
 
 /* ---------- questions and answers ---------- */
 function qItems(screen){
@@ -1328,6 +1600,7 @@ $("list").addEventListener("click", e=>{
   if(b.dataset.a==="look") return openLook([id]);
   if(b.dataset.a==="ask") return openAsk([id]);
   if(b.dataset.a==="end") return openEnd([id]);
+  if(b.dataset.a==="snd") return openSnd([id]);
   doAction([id], b.dataset.a);
 });
 $("list").addEventListener("change", e=>{
@@ -1341,7 +1614,8 @@ document.querySelectorAll("[data-g]").forEach(b=>b.addEventListener("click", ()=
   if(b.dataset.g==="msg") return openMsg(ids);
   if(b.dataset.g==="look") return openLook(ids);
   if(b.dataset.g==="ask") return openAsk(ids);
-  if(b.dataset.g==="end") return openEnd(ids); doAction(ids,b.dataset.g);
+  if(b.dataset.g==="end") return openEnd(ids);
+  if(b.dataset.g==="snd") return openSnd(ids); doAction(ids,b.dataset.g);
 }));
 $("d-fs").addEventListener("click", ()=>{
   const el=document.documentElement, p=el.requestFullscreen?el.requestFullscreen():null;
@@ -1365,6 +1639,7 @@ B.start(data=>{
   renderAll();
 }, st=>{ S.status=st; renderAll(); });
 B.on("inbox", onInbox);
+B.on("chat", onChat);
 route();
 setInterval(tick,100);
 })();
