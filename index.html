@@ -156,8 +156,18 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
 .infx-check li::before{content:"✓";color:#A34F00;font-weight:700;margin-right:.5em}
 .infx-follow{border-top:1px solid #E1E5EB;padding-top:.6em;color:#4A5565;font-size:clamp(13px,1.2vw,22px)}
 .infx-follow b{color:#041E42}
+.infx-follow .fh{font-weight:700;color:#041E42;margin-bottom:.5em}
+.fq{display:flex;flex-wrap:wrap;gap:1em}
+.fq-item{display:flex;align-items:center;gap:.7em;border:1px solid #E1E5EB;border-radius:12px;padding:.5em .8em .5em .5em}
+.fq-item svg{width:clamp(70px,7vw,130px);height:auto;display:block}
+.fq-item .n{font-size:.85em;color:#4A5565}
+.fq-item .h{font-weight:700;color:#041E42}
+.fq-item svg{width:min(7vw,13vh)}
+.d-infox.full .fq-item svg{width:min(9vw,15vh)}
+.d-infox.full .infx-check{gap:0}
+.d-infox.full .infx-card{gap:.5em}
 .d-infox.full .infx-lines{font-size:clamp(22px,2.6vw,48px)}
-.d-infox.full .infx-check{font-size:clamp(18px,2vw,36px)}
+.d-infox.full .infx-check{font-size:min(2vw,3.6vh)}
 .d-infox.full .infx-call{font-size:clamp(18px,2vw,34px)}
 .d-chat{position:absolute;right:2vw;top:50%;transform:translateY(-50%);width:min(580px,44vw);max-height:86vh;z-index:7;display:flex}
 .chat-card{color-scheme:light;flex:1;display:flex;flex-direction:column;gap:.6em;background:#FFFFFF;color:#15303A;border-radius:18px;padding:clamp(14px,1.6vw,26px);box-shadow:0 20px 60px rgba(0,0,0,.4);font-family:var(--ui);min-height:0}
@@ -456,7 +466,7 @@ dialog h2{margin:0;font-size:1.25rem}
     <label class="field"><span>Phone numbers</span><textarea id="i-lines" rows="4" maxlength="400" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></textarea><span class="hint">One per line, as Label: number</span></label>
     <label class="field"><span>Calling heading</span><input type="text" id="i-callh" maxlength="100" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></label>
     <label class="field"><span>Checklist</span><textarea id="i-check" rows="7" maxlength="800" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></textarea><span class="hint">One item per line.</span></label>
-    <label class="field"><span>Follow us</span><textarea id="i-follow" rows="3" maxlength="300" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></textarea><span class="hint">One per line, as Network: name. Leave empty to hide.</span></label>
+    <label class="field"><span>Follow us</span><textarea id="i-follow" rows="3" maxlength="1000" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></textarea><span class="hint">One per line, as Network: name. Instagram and Snapchat get a QR code automatically from the @name. For any other, add its link after a | , e.g. Facebook: UTEP Center for Simulation | https://www.facebook.com/… . Leave empty to hide.</span></label>
     <div class="dlg-acts">
       <button class="btn left" type="button" id="i-defaults">Restore defaults</button>
       <button class="btn" value="cancel" formnovalidate>Cancel</button>
@@ -1336,6 +1346,18 @@ function infoOf(c){
     check:i.check?arr(i.check).filter(Boolean):INFO_DEFAULT.check, follow:i.follow?arr(i.follow).filter(Boolean):INFO_DEFAULT.follow };
 }
 S.infoView="compact";
+function followItem(t){
+  let url=""; const bar=t.indexOf("|"); if(bar>=0){ url=t.slice(bar+1).trim(); t=t.slice(0,bar).trim(); }
+  if(url && !/^https?:\/\/\S+$/i.test(url)) url="";
+  const k=t.indexOf(":"), net=k>0?t.slice(0,k).trim():"", name=k>0?t.slice(k+1).trim():t.trim();
+  const handle=name.replace(/^@/,"");
+  if(!url && /^[A-Za-z0-9._-]+$/.test(handle)){
+    if(/instagram/i.test(net)) url="https://www.instagram.com/"+handle+"/";
+    else if(/snapchat/i.test(net)) url="https://www.snapchat.com/add/"+handle;
+    else if(/tiktok/i.test(net)) url="https://www.tiktok.com/@"+handle;
+  }
+  return {net,name,url};
+}
 function renderInfo(c){
   const d=$("v-display"), I=infoOf(c);
   if(!I.on){ $("d-info").hidden=true; $("d-infox").hidden=true; d.classList.remove("has-info"); return; }
@@ -1343,7 +1365,7 @@ function renderInfo(c){
   $("d-info").hidden=big; d.classList.toggle("has-info",!big);
   $("d-infox").hidden=!big; $("d-infox").classList.toggle("full",S.infoView==="full");
   $("infx-size").textContent = S.infoView==="full" ? "Smaller" : "Full screen";
-  const sig=JSON.stringify(I); if($("d-info")._sig===sig) return; $("d-info")._sig=sig;
+  const sig=JSON.stringify(I)+!!window.qrcode; if($("d-info")._sig===sig) return; $("d-info")._sig=sig;
   const here = I.lab ? 'You are in lab <b>'+esc(I.lab)+'</b>' : '';
   $("inf-here").innerHTML=here; $("inf-here").hidden=!I.lab;
   $("inf-lines").innerHTML=I.lines.map(x=>'<div><span>'+esc(x.l)+'</span><b>'+esc(x.v||"")+'</b></div>').join("");
@@ -1353,7 +1375,9 @@ function renderInfo(c){
   $("infx-callwrap").hidden=!(I.callH||I.check.length);
   $("infx-call").textContent=I.callH; $("infx-check").innerHTML=I.check.map(t=>'<li>'+esc(t)+'</li>').join("");
   $("infx-follow").hidden=!I.follow.length;
-  $("infx-follow").innerHTML='Follow us: '+I.follow.map(t=>{ const k=t.indexOf(":"); return k>0?esc(t.slice(0,k))+' <b>'+esc(t.slice(k+1).trim())+'</b>':'<b>'+esc(t)+'</b>'; }).join(' &nbsp;·&nbsp; ');
+  const fs=I.follow.map(followItem);
+  $("infx-follow").innerHTML='<div class="fh">Follow us</div><div class="fq">'+fs.map(f=>{ const svg=f.url?qrSvg(f.url):null;
+    return '<div class="fq-item">'+(svg||'')+'<div>'+(f.net?'<div class="n">'+esc(f.net)+'</div>':'')+'<div class="h">'+esc(f.name)+'</div>'+(svg?'<div class="n">Scan to follow</div>':'')+'</div></div>'; }).join("")+'</div>';
 }
 let infoTimer=null;
 function setInfoView(v){ S.infoView=v; clearTimeout(infoTimer); if(v!=="compact") infoTimer=setTimeout(()=>{ S.infoView="compact"; renderAll(); }, 5*60000); renderAll(); }
@@ -1382,7 +1406,7 @@ $("f-info").addEventListener("submit", e=>{
   const lines=$("i-lines").value.split("\n").map(s=>s.trim()).filter(Boolean).slice(0,8).map(s=>{ const k=s.lastIndexOf(":"); return k>0?{l:s.slice(0,k).trim().slice(0,40),v:s.slice(k+1).trim().slice(0,20)}:{l:s.slice(0,40),v:""}; });
   const base={on:$("i-on").checked, lines, callH:$("i-callh").value.trim().slice(0,100),
     check:$("i-check").value.split("\n").map(s=>s.trim().slice(0,80)).filter(Boolean).slice(0,14),
-    follow:$("i-follow").value.split("\n").map(s=>s.trim().slice(0,60)).filter(Boolean).slice(0,5)};
+    follow:$("i-follow").value.split("\n").map(s=>s.trim().slice(0,200)).filter(Boolean).slice(0,5)};
   const multi=S.infoIds.length>1, now=B.now();
   S.infoIds.forEach(id=>{ const c=S.clocks.get(id); if(!c) return;
     const info=Object.assign({},base,{lab: multi ? ((c.info&&c.info.lab)||labOf(c)) : $("i-lab").value.trim().slice(0,12)});
