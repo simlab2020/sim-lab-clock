@@ -128,6 +128,37 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
 .d-call svg{width:1.1em;height:1.1em}
 .d-call .badge{background:#FF8200;color:#041E42;border-radius:999px;padding:0 .5em;font-size:.85em}
 #v-display.has-call .d-msg{right:calc(2vw + clamp(150px,15vw,260px))}
+#v-display.has-info .d-msg{left:calc(2vw + clamp(240px,22vw,400px))}
+.d-info{position:absolute;left:2vw;bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:5;width:clamp(240px,22vw,400px);background:var(--dtk,rgba(255,255,255,.06));border:2px solid var(--dline);border-radius:14px;padding:clamp(10px,1vw,16px);color:var(--dtext,var(--dink));font-size:clamp(13px,1.15vw,20px);line-height:1.3;display:flex;flex-direction:column;gap:.35em}
+.inf-here{font-weight:700}
+.inf-here b{color:#FF8200;font-size:1.35em}
+.inf-lines div{display:flex;justify-content:space-between;gap:.8em}
+.inf-lines b{color:var(--dink);font-variant-numeric:tabular-nums}
+.inf-btns{display:flex;gap:.4em;margin-top:.2em}
+.inf-btns button{flex:1;font:inherit;font-size:.9em;font-weight:700;border:2px solid var(--dline);background:transparent;color:var(--dtext,var(--dink));border-radius:10px;padding:.35em .5em;cursor:pointer;min-height:40px;display:flex;align-items:center;justify-content:center;gap:.35em}
+.inf-btns svg{width:1em;height:1em}
+.d-infox{position:absolute;left:2vw;top:50%;transform:translateY(-50%);width:min(640px,46vw);max-height:88vh;z-index:7;display:flex}
+.d-infox.full{inset:0;left:0;top:0;transform:none;width:auto;max-height:none;padding:3vh 3vw;background:rgba(0,0,0,.55)}
+.infx-card{color-scheme:light;flex:1;background:#FFFFFF;color:#1B2533;border-radius:18px;padding:clamp(16px,1.8vw,30px);box-shadow:0 20px 60px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:.8em;overflow:auto;font-family:var(--ui);border-top:8px solid #041E42}
+.infx-head{display:flex;justify-content:space-between;align-items:center;gap:1em}
+.infx-head h3{margin:0;color:#041E42;font-size:clamp(18px,1.8vw,30px)}
+.infx-head div{display:flex;gap:.5em}
+.infx-head button{font:inherit;font-size:clamp(14px,1.2vw,20px);font-weight:700;border:2px solid #041E42;color:#041E42;background:#fff;border-radius:999px;padding:.25em .9em;cursor:pointer;min-height:40px}
+.infx-grid{display:grid;grid-template-columns:1fr;gap:1em}
+.d-infox.full .infx-grid{grid-template-columns:1fr 1.2fr;gap:2em}
+.infx-here{font-weight:700;color:#A34F00;font-size:clamp(20px,2vw,36px)}
+.infx-here b{font-size:1.3em}
+.infx-lines{display:flex;flex-direction:column;gap:.25em;font-size:clamp(18px,1.8vw,34px);font-weight:700;color:#041E42}
+.infx-lines div{display:flex;justify-content:space-between;gap:1em;border-bottom:1px solid #E1E5EB;padding:.15em 0}
+.infx-lines b{font-variant-numeric:tabular-nums}
+.infx-call{font-weight:700;color:#041E42;font-size:clamp(16px,1.5vw,28px)}
+.infx-check{list-style:none;margin:.3em 0 0;padding:0;display:flex;flex-direction:column;gap:.2em;font-size:clamp(15px,1.4vw,26px)}
+.infx-check li::before{content:"✓";color:#A34F00;font-weight:700;margin-right:.5em}
+.infx-follow{border-top:1px solid #E1E5EB;padding-top:.6em;color:#4A5565;font-size:clamp(13px,1.2vw,22px)}
+.infx-follow b{color:#041E42}
+.d-infox.full .infx-lines{font-size:clamp(22px,2.6vw,48px)}
+.d-infox.full .infx-check{font-size:clamp(18px,2vw,36px)}
+.d-infox.full .infx-call{font-size:clamp(18px,2vw,34px)}
 .d-chat{position:absolute;right:2vw;top:50%;transform:translateY(-50%);width:min(580px,44vw);max-height:86vh;z-index:7;display:flex}
 .chat-card{color-scheme:light;flex:1;display:flex;flex-direction:column;gap:.6em;background:#FFFFFF;color:#15303A;border-radius:18px;padding:clamp(14px,1.6vw,26px);box-shadow:0 20px 60px rgba(0,0,0,.4);font-family:var(--ui);min-height:0}
 .chat-head{display:flex;justify-content:space-between;align-items:center;gap:1em;font-weight:700;font-size:clamp(17px,1.8vw,30px);color:#0E6E73}
@@ -209,7 +240,7 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
 .ask-type textarea{flex:1;font:inherit;font-size:clamp(18px,2.2vw,32px);border:2px solid #9FB6BD;border-radius:12px;padding:.4em .6em;color:#15303A;background:#F6F9FA;resize:none}
 .ask-status{margin-top:.6em;font-size:clamp(16px,1.8vw,26px);color:#58717B;min-height:1.2em}
 .ask-status.err{color:#B3261E}
-.d-answered{position:absolute;left:4vw;bottom:max(18px,env(safe-area-inset-bottom,0px));z-index:4;display:flex;align-items:center;gap:.7em;background:#FFFFFF;color:#15303A;border-radius:999px;padding:.35em .5em .35em 1em;font-size:clamp(15px,1.8vw,28px);font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:80vw}
+.d-answered{position:absolute;left:4vw;top:calc(clamp(16px,2.4vw,34px)*1.6 + 24px);z-index:4;display:flex;align-items:center;gap:.7em;background:#FFFFFF;color:#15303A;border-radius:999px;padding:.35em .5em .35em 1em;font-size:clamp(15px,1.8vw,28px);font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:80vw}
 .d-answered span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .d-answered button{font:inherit;font-size:.85em;border:2px solid #0E6E73;color:#0E6E73;background:#fff;border-radius:999px;padding:.15em .8em;cursor:pointer}
 #v-display.has-msg .d-answered{bottom:calc(clamp(18px,3.2vw,56px)*2.4 + 24px)}
@@ -306,6 +337,7 @@ dialog h2{margin:0;font-size:1.25rem}
       <button class="btn small" data-g="end">End time…</button>
       <button class="btn small" data-g="ask">Ask…</button>
       <button class="btn small" data-g="snd">Sound…</button>
+      <button class="btn small" data-g="info">Room info…</button>
     </div>
     <div class="list" id="list"></div>
   </div>
@@ -361,6 +393,21 @@ dialog h2{margin:0;font-size:1.25rem}
   </aside>
   <div class="d-off" id="d-off" hidden></div>
   <div class="d-msg" id="d-msg" hidden></div>
+  <div class="d-info" id="d-info" hidden>
+    <div class="inf-here" id="inf-here"></div>
+    <div class="inf-lines" id="inf-lines"></div>
+    <div class="inf-btns"><button type="button" id="inf-more">More info</button><button type="button" id="inf-full" aria-label="Show room info full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Full</button></div>
+  </div>
+  <div class="d-infox" id="d-infox" hidden role="dialog" aria-labelledby="infx-h">
+    <div class="infx-card">
+      <div class="infx-head"><h3 id="infx-h">Room information</h3><div><button type="button" id="infx-size">Full screen</button><button type="button" id="infx-close">Close</button></div></div>
+      <div class="infx-grid">
+        <div style="display:flex;flex-direction:column;gap:.6em"><div class="infx-here" id="infx-here"></div><div class="infx-lines" id="infx-lines"></div></div>
+        <div id="infx-callwrap"><div class="infx-call" id="infx-call"></div><ul class="infx-check" id="infx-check"></ul></div>
+      </div>
+      <div class="infx-follow" id="infx-follow"></div>
+    </div>
+  </div>
   <button type="button" class="d-call" id="d-call" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>Call staff</span><span class="badge" id="call-badge" hidden></span></button>
   <div class="d-chat" id="d-chat" hidden role="dialog" aria-labelledby="chat-h">
     <div class="chat-card">
@@ -394,6 +441,26 @@ dialog h2{margin:0;font-size:1.25rem}
     <div class="dlg-acts">
       <button class="btn" value="cancel" formnovalidate>Cancel</button>
       <button class="btn primary" id="add-go" value="ok">Add screens</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ROOM INFO -->
+<dialog id="dlg-info">
+  <form method="dialog" id="f-info">
+    <h2 id="i-title">Room info</h2>
+    <p class="hint" style="margin:-6px 0 0;color:var(--muted)">A small card in the corner of the room screen. The room can open it larger or full screen. The clock isn’t affected.</p>
+    <label style="display:inline-flex;gap:8px;align-items:center"><input type="checkbox" id="i-on" checked> Show room info on the screen</label>
+    <label class="field" id="i-lab-wrap"><span>“You are currently in lab”</span><input type="text" id="i-lab" maxlength="12" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></label>
+    <p class="hint" id="i-lab-multi" style="margin:0;color:var(--muted)">Each room shows its own number, taken from its screen name.</p>
+    <label class="field"><span>Phone numbers</span><textarea id="i-lines" rows="4" maxlength="400" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></textarea><span class="hint">One per line, as Label: number</span></label>
+    <label class="field"><span>Calling heading</span><input type="text" id="i-callh" maxlength="100" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></label>
+    <label class="field"><span>Checklist</span><textarea id="i-check" rows="7" maxlength="800" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></textarea><span class="hint">One item per line.</span></label>
+    <label class="field"><span>Follow us</span><textarea id="i-follow" rows="3" maxlength="300" style="border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:42px"></textarea><span class="hint">One per line, as Network: name. Leave empty to hide.</span></label>
+    <div class="dlg-acts">
+      <button class="btn left" type="button" id="i-defaults">Restore defaults</button>
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" value="ok">Save</button>
     </div>
   </form>
 </dialog>
@@ -885,6 +952,7 @@ function renderControl(){
         '<button class="btn small" data-a="end">End time</button>'+
         '<button class="btn small" data-a="ask">Ask</button>'+
         '<button class="btn small" data-a="snd">Sound</button>'+
+        '<button class="btn small" data-a="info">Room info</button>'+
         '<button class="btn small" data-a="look">Colors</button>'+
         '<button class="btn small" data-a="msg">Messages'+(tickerOf(c).length?' ('+tickerOf(c).length+')':'')+'</button>'+
         '<button class="btn small" data-a="edit">Edit</button>'+
@@ -907,7 +975,7 @@ function renderDisplay(){
   const c=S.clocks.get(S.displayId), off=$("d-off"), d=$("v-display");
   ["d-mode","d-time"].forEach(x=>$(x).hidden=!c);
   if(!c){
-    $("d-status").hidden=true; $("d-msg").hidden=true; renderTicker(null); applyLook(d, null); d.classList.remove("ended","split"); $("d-side").hidden=true; $("d-call").hidden=true; $("d-chat").hidden=true; $("d-cues").innerHTML=""; $("d-cues")._sig=""; $("d-ask").hidden=true; $("d-answered").hidden=true; $("d-name").textContent=""; d.dataset.dtheme="monitor"; off.hidden=false;
+    $("d-status").hidden=true; $("d-msg").hidden=true; renderTicker(null); applyLook(d, null); d.classList.remove("ended","split"); $("d-side").hidden=true; $("d-call").hidden=true; $("d-chat").hidden=true; $("d-info").hidden=true; $("d-infox").hidden=true; d.classList.remove("has-info"); $("d-cues").innerHTML=""; $("d-cues")._sig=""; $("d-ask").hidden=true; $("d-answered").hidden=true; $("d-name").textContent=""; d.dataset.dtheme="monitor"; off.hidden=false;
     off.textContent = S.status==="wait" ? "Connecting…" : S.status==="none" ? "Can’t reach the clock. Check the network connection." : "This screen isn’t set up. Choose another with “Change screen”.";
     return;
   }
@@ -920,6 +988,7 @@ function renderDisplay(){
   renderTicker(c);
   d.classList.toggle("has-call", c.callBtn!==false); $("d-call").hidden = c.callBtn===false;
   checkPing(c);
+  renderInfo(c);
   renderRoomChat();
 }
 function renderTicker(c){
@@ -1250,6 +1319,77 @@ function cueSounds(c,now){
     if((st!=="running"&&st!=="paused") || el<tr){ played[k]="armed"; return; }
     if(played[k]==="armed"){ played[k]="done"; if(el-tr<3000) playSound(x.snd,x.n||1); } });
 }
+
+/* ---------- room info card ---------- */
+const INFO_DEFAULT={
+  lines:[{l:"Hospital Ext",v:"2508"},{l:"Blood Bank Lab",v:"117"},{l:"Lab Work",v:"117"}],
+  callH:"When calling the hospital, please state:",
+  check:["SBAR","Your full name","Patient’s full name","Patient’s MR # (Medical Record Number)","Patient’s DOB","Patient’s bed (A, B, C, etc.)","Patient’s physician","Assessment","Recommendation"],
+  follow:["Facebook: UTEP Center for Simulation","Instagram: @UTEPSIMLAB","Snapchat: UTEPSIMLAB"]
+};
+function arr(x){ return Array.isArray(x)?x:x?Object.values(x):[]; }
+function labOf(c){ return ((c&&c.name||"").match(/\d+/)||[""])[0]; }
+function infoOf(c){
+  const i=c&&c.info||{};
+  return { on:i.on!==false, lab:(typeof i.lab==="string"&&i.lab)?i.lab:labOf(c),
+    lines:i.lines?arr(i.lines).filter(x=>x&&x.l):INFO_DEFAULT.lines, callH:typeof i.callH==="string"?i.callH:INFO_DEFAULT.callH,
+    check:i.check?arr(i.check).filter(Boolean):INFO_DEFAULT.check, follow:i.follow?arr(i.follow).filter(Boolean):INFO_DEFAULT.follow };
+}
+S.infoView="compact";
+function renderInfo(c){
+  const d=$("v-display"), I=infoOf(c);
+  if(!I.on){ $("d-info").hidden=true; $("d-infox").hidden=true; d.classList.remove("has-info"); return; }
+  const big=S.infoView!=="compact";
+  $("d-info").hidden=big; d.classList.toggle("has-info",!big);
+  $("d-infox").hidden=!big; $("d-infox").classList.toggle("full",S.infoView==="full");
+  $("infx-size").textContent = S.infoView==="full" ? "Smaller" : "Full screen";
+  const sig=JSON.stringify(I); if($("d-info")._sig===sig) return; $("d-info")._sig=sig;
+  const here = I.lab ? 'You are in lab <b>'+esc(I.lab)+'</b>' : '';
+  $("inf-here").innerHTML=here; $("inf-here").hidden=!I.lab;
+  $("inf-lines").innerHTML=I.lines.map(x=>'<div><span>'+esc(x.l)+'</span><b>'+esc(x.v||"")+'</b></div>').join("");
+  $("inf-more").hidden=!(I.check.length||I.follow.length);
+  $("infx-here").innerHTML = I.lab ? 'You are currently in lab <b>'+esc(I.lab)+'</b>' : ''; $("infx-here").hidden=!I.lab;
+  $("infx-lines").innerHTML=I.lines.map(x=>'<div><span>'+esc(x.l)+'</span><b>'+esc(x.v||"")+'</b></div>').join("");
+  $("infx-callwrap").hidden=!(I.callH||I.check.length);
+  $("infx-call").textContent=I.callH; $("infx-check").innerHTML=I.check.map(t=>'<li>'+esc(t)+'</li>').join("");
+  $("infx-follow").hidden=!I.follow.length;
+  $("infx-follow").innerHTML='Follow us: '+I.follow.map(t=>{ const k=t.indexOf(":"); return k>0?esc(t.slice(0,k))+' <b>'+esc(t.slice(k+1).trim())+'</b>':'<b>'+esc(t)+'</b>'; }).join(' &nbsp;·&nbsp; ');
+}
+let infoTimer=null;
+function setInfoView(v){ S.infoView=v; clearTimeout(infoTimer); if(v!=="compact") infoTimer=setTimeout(()=>{ S.infoView="compact"; renderAll(); }, 5*60000); renderAll(); }
+$("inf-more").addEventListener("click", ()=>setInfoView("panel"));
+$("inf-full").addEventListener("click", ()=>setInfoView("full"));
+$("infx-size").addEventListener("click", ()=>setInfoView(S.infoView==="full"?"panel":"full"));
+$("infx-close").addEventListener("click", ()=>setInfoView("compact"));
+$("d-infox").addEventListener("click", e=>{ if(e.target===$("d-infox")) setInfoView("compact"); });
+/* staff dialog */
+function fillInfo(I){
+  $("i-on").checked=I.on; $("i-lines").value=I.lines.map(x=>x.l+": "+(x.v||"")).join("\n");
+  $("i-callh").value=I.callH; $("i-check").value=I.check.join("\n"); $("i-follow").value=I.follow.join("\n");
+}
+function openInfo(ids){
+  S.infoIds=ids.filter(id=>S.clocks.has(id)); if(!S.infoIds.length) return;
+  const c=S.clocks.get(S.infoIds[0]), multi=S.infoIds.length>1, all=multi&&S.infoIds.length===S.clocks.size;
+  $("i-title").textContent = !multi ? "Room info: "+c.name : all ? "Room info: all screens" : "Room info: "+S.infoIds.length+" screens";
+  const I=infoOf(c); fillInfo(I); $("i-lab").value=I.lab;
+  $("i-lab-wrap").hidden=multi; $("i-lab-multi").hidden=!multi;
+  $("dlg-info").showModal();
+}
+$("i-defaults").addEventListener("click", ()=>{ const c=S.clocks.get(S.infoIds[0]); fillInfo(Object.assign({on:true},INFO_DEFAULT)); $("i-lab").value=labOf(c); });
+$("f-info").addEventListener("submit", e=>{
+  if(!e.submitter||e.submitter.value!=="ok") return;
+  if(!S.user){ toast("Sign in as staff to change room info."); return; }
+  const lines=$("i-lines").value.split("\n").map(s=>s.trim()).filter(Boolean).slice(0,8).map(s=>{ const k=s.lastIndexOf(":"); return k>0?{l:s.slice(0,k).trim().slice(0,40),v:s.slice(k+1).trim().slice(0,20)}:{l:s.slice(0,40),v:""}; });
+  const base={on:$("i-on").checked, lines, callH:$("i-callh").value.trim().slice(0,100),
+    check:$("i-check").value.split("\n").map(s=>s.trim().slice(0,80)).filter(Boolean).slice(0,14),
+    follow:$("i-follow").value.split("\n").map(s=>s.trim().slice(0,60)).filter(Boolean).slice(0,5)};
+  const multi=S.infoIds.length>1, now=B.now();
+  S.infoIds.forEach(id=>{ const c=S.clocks.get(id); if(!c) return;
+    const info=Object.assign({},base,{lab: multi ? ((c.info&&c.info.lab)||labOf(c)) : $("i-lab").value.trim().slice(0,12)});
+    S.clocks.set(id,Object.assign({},c,{info,updatedAt:now}));
+    chains[id]=(chains[id]||Promise.resolve()).then(()=>B.update(id,{info,updatedAt:now})).catch(failed); });
+  renderAll(); toast(multi?"Room info saved on "+S.infoIds.length+" screens.":"Room info saved.");
+});
 
 /* ---------- split end screen ---------- */
 function qrSvg(url){
@@ -1601,6 +1741,7 @@ $("list").addEventListener("click", e=>{
   if(b.dataset.a==="ask") return openAsk([id]);
   if(b.dataset.a==="end") return openEnd([id]);
   if(b.dataset.a==="snd") return openSnd([id]);
+  if(b.dataset.a==="info") return openInfo([id]);
   doAction([id], b.dataset.a);
 });
 $("list").addEventListener("change", e=>{
@@ -1615,7 +1756,8 @@ document.querySelectorAll("[data-g]").forEach(b=>b.addEventListener("click", ()=
   if(b.dataset.g==="look") return openLook(ids);
   if(b.dataset.g==="ask") return openAsk(ids);
   if(b.dataset.g==="end") return openEnd(ids);
-  if(b.dataset.g==="snd") return openSnd(ids); doAction(ids,b.dataset.g);
+  if(b.dataset.g==="snd") return openSnd(ids);
+  if(b.dataset.g==="info") return openInfo(ids); doAction(ids,b.dataset.g);
 }));
 $("d-fs").addEventListener("click", ()=>{
   const el=document.documentElement, p=el.requestFullscreen?el.requestFullscreen():null;
